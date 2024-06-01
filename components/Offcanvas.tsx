@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import useMountTransition from "@/hooks/useMountTransition";
+import ReactPortal from "@/components/ReactPortal";
 
 export default function Offcanvas({
   className,
@@ -14,11 +15,11 @@ export default function Offcanvas({
 }) {
   const hasTransitionedIn = useMountTransition({
     isMounted: isOpen,
-    unmountDelay: 1000,
+    unmountDelay: 500,
   });
 
   return (
-    <>
+    <ReactPortal>
       {(hasTransitionedIn || isOpen) && (
         <>
           <div
@@ -37,6 +38,6 @@ export default function Offcanvas({
           </div>
         </>
       )}
-    </>
+    </ReactPortal>
   );
 }

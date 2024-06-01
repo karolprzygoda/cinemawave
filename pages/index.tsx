@@ -25,8 +25,10 @@ export default function Home() {
   const { data: user } = useCurrentUser();
 
   return (
-    <>
-      <Navbar />
-    </>
+    <div className={"w-screen h-screen  overflow-x-auto"} id={"indexWrapper"}>
+      <div className={"min-w-[280px] "}>
+        <Navbar />
+      </div>
+    </div>
   );
 }

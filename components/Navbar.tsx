@@ -1,16 +1,16 @@
-//import NavbarItem from "./NavbarItem";
-import { FaSearch, FaRegBell, FaCaretDown } from "react-icons/fa";
+import NavbarItem from "./NavbarItem";
+import { FaCaretDown } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import { useEffect, useRef, useState } from "react";
-//import AccountMenu from "@/components/AccountMenu";
+import AccountMenu from "@/components/AccountMenu";
 import Offcanvas from "@/components/Offcanvas";
 import { useWindowSize } from "react-use";
 import SearchInput from "@/components/SearchInput";
 import ReactPortal from "@/components/ReactPortal";
 
-const TOP_OFFSET = 2;
+const TOP_OFFSET = 66;
 
-const Navbar = () => {
+export default function Navbar() {
   const [showBackground, setShowBackground] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
@@ -20,19 +20,19 @@ const Navbar = () => {
   const handleCloseOffcanvas = () => setShowOffcanvas(false);
 
   useEffect(() => {
-    console.log("useEffect called");
+    const element = document.querySelector("#indexWrapper");
     const handleScroll = () => {
-      console.log("xd");
-
-      if (window.scrollY >= TOP_OFFSET) {
+      if (element!.scrollTop >= TOP_OFFSET) {
         setShowBackground(true);
       } else {
         setShowBackground(false);
       }
     };
-    window.addEventListener("scroll", handleScroll);
+
+    element!.addEventListener("scroll", handleScroll);
+
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      element!.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -40,7 +40,7 @@ const Navbar = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    setIsOpen(true);
+    setIsOpen(width >= 1024);
   };
 
   const handleMouseLeave = () => {
@@ -65,7 +65,7 @@ const Navbar = () => {
   const { width } = useWindowSize();
 
   return (
-    <nav className={"w-full fixed top-0 z-30  min-w-[280px]"}>
+    <nav className={"w-full sticky top-0 z-30  "}>
       <div
         className={`px-4 md:px-16 py-6 flex items-center duration-500 ${showBackground ? " bg-zinc-900 bg-opacity-90" : ""} `}
       >
@@ -82,7 +82,7 @@ const Navbar = () => {
             onMouseLeave={handleMouseLeaveCategory}
             className={"flex items-center gap-3"}
           >
-            {/*<NavbarItem label={"Przeglądaj"} />*/}
+            <NavbarItem href={"#"} label={"Przeglądaj"} />
             <FaCaretDown
               className={`hidden lg:block text-white transition ${categoryOpen ? "rotate-180" : "rotate-0"}`}
             />
@@ -93,53 +93,59 @@ const Navbar = () => {
             className={`border border-neutral-600  absolute  text-nowrap flex-col text-center mt-4 bg-black bg-opacity-60 transition-all duration-300 " ${categoryOpen ? "opacity-100 flex" : "opacity-0 hidden"} `}
             style={{ transitionBehavior: "allow-discrete" }}
           >
-            {/*<NavbarItem*/}
-            {/*  className={"duration-500 p-4 bg-opacity-65 hover:bg-neutral-700"}*/}
-            {/*  label={"Strona główna"}*/}
-            {/*/>*/}
-            {/*<NavbarItem*/}
-            {/*  className={*/}
-            {/*    "duration-500 p-4 bg-opacity-65   hover:bg-neutral-700"*/}
-            {/*  }*/}
-            {/*  label={"Seriale"}*/}
-            {/*/>*/}
-            {/*<NavbarItem*/}
-            {/*  className={"duration-500 p-4 bg-opacity-65  hover:bg-neutral-700"}*/}
-            {/*  label={"Filmy"}*/}
-            {/*/>*/}
-            {/*<NavbarItem*/}
-            {/*  className={*/}
-            {/*    "duration-500 p-4 bg-opacity-65   hover:bg-neutral-700"*/}
-            {/*  }*/}
-            {/*  label={"Nowe i Popularne"}*/}
-            {/*/>*/}
-            {/*<NavbarItem*/}
-            {/*  className={*/}
-            {/*    "duration-500 p-4 bg-opacity-65   hover:bg-neutral-700"*/}
-            {/*  }*/}
-            {/*  label={"Moja lista"}*/}
-            {/*/>*/}
+            <NavbarItem
+              href={"#"}
+              className={"duration-500 p-4 bg-opacity-65 hover:bg-neutral-700"}
+              label={"Strona główna"}
+            />
+            <NavbarItem
+              href={"#"}
+              className={
+                "duration-500 p-4 bg-opacity-65   hover:bg-neutral-700"
+              }
+              label={"Seriale"}
+            />
+            <NavbarItem
+              href={"#"}
+              className={"duration-500 p-4 bg-opacity-65  hover:bg-neutral-700"}
+              label={"Filmy"}
+            />
+            <NavbarItem
+              href={"#"}
+              className={
+                "duration-500 p-4 bg-opacity-65   hover:bg-neutral-700"
+              }
+              label={"Nowe i Popularne"}
+            />
+            <NavbarItem
+              href={"#"}
+              className={
+                "duration-500 p-4 bg-opacity-65   hover:bg-neutral-700"
+              }
+              label={"Moja lista"}
+            />
           </div>
         </div>
         <div className={" ml-8 gap-7 hidden xl:flex text-nowrap"}>
-          {/*<NavbarItem label={"Strona główna"} />*/}
-          {/*<NavbarItem label={"Seriale"} />*/}
-          {/*<NavbarItem label={"Filmy"} />*/}
-          {/*<NavbarItem label={"Nowe i Popularne"} />*/}
-          {/*<NavbarItem label={"Moja lista"} />*/}
+          <NavbarItem href={"#"} label={"Strona główna"} />
+          <NavbarItem href={"#"} label={"Seriale"} />
+          <NavbarItem href={"#"} label={"Filmy"} />
+          <NavbarItem href={"#"} label={"Nowe i Popularne"} />
+          <NavbarItem href={"#"} label={"Moja lista"} />
         </div>
         <div className={"flex ml-auto gap-7 items-center relative"}>
           <SearchInput />
-          <div
-            onClick={() => setIsOpen(!isOpen)}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            className={"flex items-center gap-2 cursor-pointer relative"}
-          >
+          <div className={"flex items-center gap-2  relative"}>
             <button
               className={"flex items-center gap-3"}
               type={"button"}
-              onClick={() => setShowOffcanvas(width < 1024)}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onClick={
+                width >= 1024
+                  ? () => setIsOpen(!isOpen)
+                  : () => setShowOffcanvas(true)
+              }
             >
               <div
                 className={"w-6 h-6 lg:w-10 lg:h-10 rounded-md overflow-hidden"}
@@ -150,27 +156,27 @@ const Navbar = () => {
                 className={`hidden lg:block text-white transition ${isOpen ? "rotate-180" : "rotate-0"}`}
               />
             </button>
-            {/*<AccountMenu*/}
-            {/*  isOpen={isOpen && width >= 1024}*/}
-            {/*  onMouseEnter={handleMouseEnter}*/}
-            {/*  onMouseLeave={handleMouseLeave}*/}
-            {/*/>*/}
+            <AccountMenu
+              isOpen={isOpen}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            />
           </div>
         </div>
       </div>
       <ReactPortal>
         <Offcanvas
-          // className={"bg-black text-white "}
+          className={"bg-black text-white "}
           isOpen={showOffcanvas}
           handleClose={handleCloseOffcanvas}
         >
-          <div className="p-4 flex items-center justify-between  mb-3 text-base  text-neutral-400 ">
+          <div className="p-4 flex items-center justify-between   text-base  text-neutral-400 ">
             Menu
-            <button>
+            <button type={"button"} onClick={handleCloseOffcanvas}>
               <IoClose />
             </button>
           </div>
-          <div className={" flex items-center gap-3 px-4 "}>
+          <div className={" flex items-center gap-3 p-4 "}>
             <img
               className={"w-9 h-9  rounded-md"}
               src="/images/default-blue.png"
@@ -183,14 +189,18 @@ const Navbar = () => {
           </div>
           <ul
             className={
-              "p-4 flex flex-col gap-3 border-b border-neutral-400 text-neutral-400"
+              "font-semibold p-4 flex flex-col gap-3 border-b border-neutral-400 text-neutral-400"
             }
           >
             <li>Konto</li>
             <li>Centrum pomocy</li>
             <li>Wyloguj się</li>
           </ul>
-          <ul className={"p-4 flex flex-col gap-3 text-neutral-400"}>
+          <ul
+            className={
+              "font-semibold  p-4 flex flex-col gap-3 text-neutral-400"
+            }
+          >
             <li>Strona główna</li>
             <li>Seriale</li>
             <li>Filmy</li>
@@ -201,6 +211,4 @@ const Navbar = () => {
       </ReactPortal>
     </nav>
   );
-};
-
-export default Navbar;
+}

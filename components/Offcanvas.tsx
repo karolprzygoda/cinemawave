@@ -2,10 +2,12 @@ import { ReactNode } from "react";
 import useMountTransition from "@/hooks/useMountTransition";
 
 export default function Offcanvas({
+  className,
   children,
   isOpen,
   handleClose,
 }: {
+  className?: String;
   children?: ReactNode;
   isOpen: boolean;
   handleClose: () => void;
@@ -27,14 +29,9 @@ export default function Offcanvas({
           ></div>
 
           <div
-            className={
-              " z-50 w-screen max-w-sm top-0 left-0 absolute bg-white h-dvh shadow-xl delay-400 duration-500 ease-in-out transition-transform transform " +
-              (hasTransitionedIn && isOpen
-                ? "translate-x-0"
-                : "-translate-x-full")
-            }
+            className={`${className} overflow-auto  z-50 w-screen max-w-xs top-0 left-0 absolute  h-dvh shadow-xl delay-400 duration-500 ease-in-out transition-transform transform ${hasTransitionedIn && isOpen ? "translate-x-0" : "-translate-x-full"}`}
           >
-            <div className="relative w-screen max-w-sm pb-10 flex flex-col space-y-6 h-full">
+            <div className="min-w-[280px] relative w-full max-w-full pb-10 flex flex-col  h-full">
               {children}
             </div>
           </div>

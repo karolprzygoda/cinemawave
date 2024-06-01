@@ -17,7 +17,7 @@ export default function AuthFormContainer({
     >
       <div
         className={
-          "bg-black bg-opacity-70 px-3 lg:px-10  py-14  max-w-md  rounded-md w-full flex flex-col"
+          "bg-black bg-opacity-70  lg:px-10  py-14 max-w-[90%]  lg:max-w-md  rounded-md w-full flex flex-col"
         }
       >
         {children}

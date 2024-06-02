@@ -70,7 +70,7 @@ export default function Navbar() {
   const { width } = useWindowSize();
 
   return (
-    <nav className={"w-full sticky top-0 z-30  "}>
+    <nav className={"w-full sticky top-0 z-30 "}>
       <div
         className={`px-4 md:px-16 py-6 flex items-center duration-500 ${showBackground ? " bg-zinc-900 bg-opacity-90" : ""} `}
       >
@@ -92,7 +92,7 @@ export default function Navbar() {
               className={`hidden lg:block text-white transition duration-300 ${categoryOpen ? "rotate-180" : "rotate-0"}`}
             />
           </button>
-          {(hasTransitionedIn || isOpen) && (
+          {(hasTransitionedIn || categoryOpen) && (
             <div
               onMouseEnter={handleMouseEnterCategory}
               onMouseLeave={handleMouseLeaveCategory}

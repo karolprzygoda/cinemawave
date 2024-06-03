@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Billboard from "@/components/Billboard";
 import MovieList from "@/components/MovieList";
 import useMovieList from "@/hooks/useMovieList";
+import useFavorites from "@/hooks/useFavorites";
 
 export async function getServerSideProps(context: NextPageContext) {
   const session = await getSession(context);
@@ -26,6 +27,7 @@ export async function getServerSideProps(context: NextPageContext) {
 
 export default function Home() {
   const { data: movies = [] } = useMovieList();
+  const { data: favorites = [] } = useFavorites();
 
   return (
     <div className={"w-screen h-screen  overflow-x-auto"} id={"indexWrapper"}>
@@ -34,6 +36,7 @@ export default function Home() {
         <Billboard />
         <div className={"pb-40  overflow-x-clip"}>
           <MovieList data={movies} title={"Ostatnio popularne"} />
+          <MovieList data={favorites} title={"Moja lista"} />
         </div>
       </div>
     </div>

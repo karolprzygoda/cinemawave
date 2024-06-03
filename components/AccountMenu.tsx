@@ -1,6 +1,7 @@
 import { signOut } from "next-auth/react";
 import { MouseEventHandler } from "react";
 import useMountTransition from "@/hooks/useMountTransition";
+import useCurrentUser from "@/hooks/useCurrentUser";
 
 export default function AccountMenu({
   isOpen,
@@ -11,6 +12,8 @@ export default function AccountMenu({
   onMouseEnter: MouseEventHandler;
   onMouseLeave: MouseEventHandler;
 }) {
+  const { data } = useCurrentUser();
+
   const hasTransitionedIn = useMountTransition({
     isMounted: isOpen,
     unmountDelay: 300,
@@ -34,7 +37,7 @@ export default function AccountMenu({
                 alt="userIcon"
               />
               <p className={"text-white text-sm group-hover/items:underline"}>
-                Username
+                {data?.name}
               </p>
             </div>
             <hr className={"bg-gray-600 border-0 h-px my-4"} />

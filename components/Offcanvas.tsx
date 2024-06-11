@@ -30,7 +30,7 @@ export default function Offcanvas({
           ></div>
 
           <div
-            className={`${className} overflow-auto  z-50 w-screen max-w-xs top-0 left-0 absolute  h-dvh shadow-xl delay-400 duration-500 ease-in-out transition-transform transform ${hasTransitionedIn && isOpen ? "translate-x-0" : "-translate-x-full"}`}
+            className={`${className} overflow-auto  z-50 w-screen max-w-xs top-0 left-0 absolute  h-screen shadow-xl delay-400 duration-500 ease-in-out transition-transform transform ${hasTransitionedIn && isOpen ? "translate-x-0" : "-translate-x-full"}`}
           >
             <div className="min-w-[280px] relative w-full max-w-full pb-10 flex flex-col  h-full">
               {children}

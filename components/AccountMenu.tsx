@@ -26,8 +26,8 @@ export default function AccountMenu({
         <div
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
-          className={` bg-black opacity-80 w-56 absolute top-14 right-0 py-5 flex-col border-2 border-gray-800 flex transition duration-300 ${
-            hasTransitionedIn && isOpen ? "opacity-100" : "opacity-0"
+          className={` bg-black  w-56 absolute top-14 right-0 py-5 flex-col border-2 border-gray-800 flex transition duration-300 ${
+            hasTransitionedIn && isOpen ? "opacity-80" : "opacity-0"
           }`}
         >
           <div className={"flex flex-col gap-3"}>

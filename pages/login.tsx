@@ -7,15 +7,18 @@ import * as yup from "yup";
 import AuthScreensWrapper from "@/components/AuthScreensWrapper";
 import { useRouter } from "next/navigation";
 import AuthFormContainer from "@/components/AuthFormContainer";
+import { PulseLoader } from "react-spinners";
 
 export default function Login() {
   const { Formik } = formik;
   const router = useRouter();
   const [userExists, setUserExists] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const handleShow = () => setUserExists(false);
 
   const login = useCallback(
     async ({ email, password }: { email: string; password: string }) => {
+      setIsLoading(true);
       try {
         const result = await signIn("credentials", {
           email,
@@ -25,11 +28,14 @@ export default function Login() {
         if (result!.error) {
           console.log(result!.error);
           handleShow();
+          setIsLoading(false);
         } else {
           router.push("/profiles");
+          setIsLoading(false);
         }
       } catch (error) {
         console.log(error);
+        setIsLoading(false);
       }
     },
     [router],
@@ -110,7 +116,11 @@ export default function Login() {
                   "py-3  bg-red-600 text-white rounded-md w-full hover:bg-red-700 transition"
                 }
               >
-                {"Zaloguj się"}
+                {isLoading ? (
+                  <PulseLoader color={"#fff"} size={10} />
+                ) : (
+                  "Zaloguj się"
+                )}
               </button>
             </form>
           )}

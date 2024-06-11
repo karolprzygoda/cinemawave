@@ -1,7 +1,7 @@
 import NavbarItem from "./NavbarItem";
 import { FaCaretDown, FaSearch } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AccountMenu from "@/components/AccountMenu";
 import Offcanvas from "@/components/Offcanvas";
 import { useWindowSize } from "react-use";
@@ -10,6 +10,7 @@ import useMountTransition from "@/hooks/useMountTransition";
 import { signOut } from "next-auth/react";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import Logo from "@/components/Logo";
+import { useRouter } from "next/router";
 
 const TOP_OFFSET = 66;
 
@@ -20,10 +21,19 @@ export default function Navbar() {
   const [showOffcanvas, setShowOffcanvas] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [currentPageState, setCurrentPageState] = useState("homePage");
+  const [searchTerm, setSearchTerm] = useState("");
+  const router = useRouter();
 
   const { data } = useCurrentUser();
 
   const handleCloseOffcanvas = () => setShowOffcanvas(false);
+
+  const handleSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (searchTerm.trim() !== "") {
+      router.push(`/search?query=${searchTerm}`);
+    }
+  };
 
   const hasTransitionedIn = useMountTransition({
     isMounted: categoryOpen,
@@ -250,18 +260,20 @@ export default function Navbar() {
           </div>
         </div>
         <div className={"p-4"}>
-          <div
+          <form
+            onSubmit={handleSearch}
             className={` flex text-gray-200 hover:text-gray-300    bg-black bg-opacity-60 border border-white p-2 `}
           >
             <button>
               <FaSearch />
             </button>
             <input
+              onChange={(e) => setSearchTerm(e.target.value)}
               className={`focus:transition-none outline-0 focus:ring-0 bg-transparent border-0 transition-all w-full px-2 ms-2 py-2" `}
               type="text"
               placeholder={"Wyszukaj...."}
             />
-          </div>
+          </form>
         </div>
         <ul
           className={

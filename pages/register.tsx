@@ -7,11 +7,13 @@ import * as formik from "formik";
 import * as yup from "yup";
 import AuthFormContainer from "@/components/AuthFormContainer";
 import AuthScreensWrapper from "@/components/AuthScreensWrapper";
+import { PulseLoader } from "react-spinners";
 
 export default function Register() {
   const { Formik } = formik;
 
   const [userExists, setUserExists] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const schema = yup.object().shape({
     name: yup.string().required("Pole jest wymagane"),
@@ -43,6 +45,7 @@ export default function Register() {
       name: string;
       password: string;
     }) => {
+      setIsLoading(true);
       try {
         await axios.post("api/register", {
           email,
@@ -54,8 +57,10 @@ export default function Register() {
           password,
           callbackUrl: "/profiles",
         });
+        setIsLoading(false);
       } catch (error) {
         console.log(error);
+        setIsLoading(false);
       }
     },
     [],
@@ -153,7 +158,11 @@ export default function Register() {
                   "py-3 bg-red-600 text-white rounded-md w-full hover:bg-red-700 transition disabled:opacity-70 disabled:hover:bg-red-600"
                 }
               >
-                {"Zarejestruj się"}
+                {isLoading ? (
+                  <PulseLoader color={"#fff"} size={10} />
+                ) : (
+                  "Zarejestruj się"
+                )}
               </button>
             </form>
           )}

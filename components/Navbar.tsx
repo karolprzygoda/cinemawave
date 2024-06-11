@@ -7,6 +7,7 @@ import Offcanvas from "@/components/Offcanvas";
 import { useWindowSize } from "react-use";
 import SearchInput from "@/components/SearchInput";
 import useMountTransition from "@/hooks/useMountTransition";
+import { signOut } from "next-auth/react";
 
 const TOP_OFFSET = 66;
 
@@ -274,7 +275,7 @@ export default function Navbar() {
             <NavbarItem href={"/faqPage"} label={"Centrum Pomocy"} />
           </li>
           <li>
-            <NavbarItem label={"Wyloguj się"} />
+            <NavbarItem onClick={() => signOut()} label={"Wyloguj się"} />
           </li>
         </ul>
         <ul

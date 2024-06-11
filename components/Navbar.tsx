@@ -1,5 +1,5 @@
 import NavbarItem from "./NavbarItem";
-import { FaCaretDown } from "react-icons/fa";
+import { FaCaretDown, FaSearch } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import { useEffect, useRef, useState } from "react";
 import AccountMenu from "@/components/AccountMenu";
@@ -16,6 +16,7 @@ export default function Navbar() {
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [showOffcanvas, setShowOffcanvas] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [currentPageState, setCurrentPageState] = useState("homePage");
 
   const handleCloseOffcanvas = () => setShowOffcanvas(false);
 
@@ -23,6 +24,18 @@ export default function Navbar() {
     isMounted: categoryOpen,
     unmountDelay: 300,
   });
+
+  const setCurrentPage = (page: string) => {
+    setCurrentPageState(page);
+    localStorage.setItem("currentPageHeader", page);
+  };
+
+  useEffect(() => {
+    const storedPage = localStorage.getItem("currentPageHeader");
+    if (storedPage) {
+      setCurrentPageState(storedPage);
+    }
+  }, []);
 
   useEffect(() => {
     const element = document.querySelector("#indexWrapper");
@@ -87,7 +100,7 @@ export default function Navbar() {
             onMouseLeave={handleMouseLeaveCategory}
             className={"flex items-center gap-3"}
           >
-            <NavbarItem href={"#"} label={"Przeglądaj"} />
+            <NavbarItem label={"Przeglądaj"} />
             <FaCaretDown
               className={`hidden lg:block text-white transition duration-300 ${categoryOpen ? "rotate-180" : "rotate-0"}`}
             />
@@ -96,41 +109,51 @@ export default function Navbar() {
             <div
               onMouseEnter={handleMouseEnterCategory}
               onMouseLeave={handleMouseLeaveCategory}
-              className={`flex border border-neutral-600  absolute  text-nowrap flex-col text-center mt-4 bg-black bg-opacity-60 transition-all duration-300 " ${hasTransitionedIn && categoryOpen ? "opacity-100 " : "opacity-0 "} `}
+              className={`flex border border-neutral-600  absolute  text-nowrap flex-col text-center mt-4 bg-black bg-opacity-80 transition-all duration-300 " ${hasTransitionedIn && categoryOpen ? "opacity-100 " : "opacity-0 "} `}
               style={{ transitionBehavior: "allow-discrete" }}
             >
               <NavbarItem
-                href={"#"}
+                href={"/"}
+                onClick={() => setCurrentPage("homePage")}
+                currentPage={currentPageState === "homePage"}
                 className={
-                  "duration-500 p-4 bg-opacity-65 hover:bg-neutral-700"
+                  " duration-500 p-4 bg-opacity-65 hover:bg-neutral-700"
                 }
                 label={"Strona główna"}
               />
               <NavbarItem
                 href={"#"}
+                onClick={() => setCurrentPage("seriesPage")}
+                currentPage={currentPageState === "seriesPage"}
                 className={
-                  "duration-500 p-4 bg-opacity-65   hover:bg-neutral-700"
+                  " duration-500 p-4 bg-opacity-65   hover:bg-neutral-700"
                 }
                 label={"Seriale"}
               />
               <NavbarItem
                 href={"#"}
+                onClick={() => setCurrentPage("moviesPage")}
+                currentPage={currentPageState === "moviesPage"}
                 className={
-                  "duration-500 p-4 bg-opacity-65  hover:bg-neutral-700"
+                  " duration-500 p-4 bg-opacity-65  hover:bg-neutral-700"
                 }
                 label={"Filmy"}
               />
               <NavbarItem
                 href={"#"}
+                onClick={() => setCurrentPage("newAndPopularPage")}
+                currentPage={currentPageState === "newAndPopularPage"}
                 className={
-                  "duration-500 p-4 bg-opacity-65   hover:bg-neutral-700"
+                  " duration-500 p-4 bg-opacity-65   hover:bg-neutral-700"
                 }
                 label={"Nowe i Popularne"}
               />
               <NavbarItem
-                href={"#"}
+                href={"/myList"}
+                onClick={() => setCurrentPage("myListPage")}
+                currentPage={currentPageState === "myListPage"}
                 className={
-                  "duration-500 p-4 bg-opacity-65   hover:bg-neutral-700"
+                  " duration-500 p-4 bg-opacity-65   hover:bg-neutral-700"
                 }
                 label={"Moja lista"}
               />
@@ -138,14 +161,44 @@ export default function Navbar() {
           )}
         </div>
         <div className={" ml-8 gap-7 hidden xl:flex text-nowrap"}>
-          <NavbarItem href={"#"} label={"Strona główna"} />
-          <NavbarItem href={"#"} label={"Seriale"} />
-          <NavbarItem href={"#"} label={"Filmy"} />
-          <NavbarItem href={"#"} label={"Nowe i Popularne"} />
-          <NavbarItem href={"#"} label={"Moja lista"} />
+          <NavbarItem
+            onClick={() => setCurrentPage("homePage")}
+            currentPage={currentPageState === "homePage"}
+            className={""}
+            href={"/"}
+            label={"Strona główna"}
+          />
+          <NavbarItem
+            onClick={() => setCurrentPage("seriesPage")}
+            currentPage={currentPageState === "seriesPage"}
+            className={""}
+            href={"#"}
+            label={"Seriale"}
+          />
+          <NavbarItem
+            onClick={() => setCurrentPage("moviesPage")}
+            currentPage={currentPageState === "moviesPage"}
+            className={""}
+            href={"#"}
+            label={"Filmy"}
+          />
+          <NavbarItem
+            className={""}
+            onClick={() => setCurrentPage("newAndPopularPage")}
+            currentPage={currentPageState === "newAndPopularPage"}
+            href={"#"}
+            label={"Nowe i Popularne"}
+          />
+          <NavbarItem
+            className={""}
+            onClick={() => setCurrentPage("myListPage")}
+            currentPage={currentPageState === "myListPage"}
+            href={"/myList"}
+            label={"Moja lista"}
+          />
         </div>
         <div className={"flex ml-auto gap-7 items-center relative"}>
-          <SearchInput />
+          {width >= 1024 && <SearchInput />}
           <div className={"flex items-center gap-2  relative"}>
             <button
               className={"flex items-center gap-3"}
@@ -197,23 +250,108 @@ export default function Navbar() {
             <div className={"text-xs"}>Przełącz profile</div>
           </div>
         </div>
+        <div className={"p-4"}>
+          <div
+            className={` flex text-gray-200 hover:text-gray-300    bg-black bg-opacity-60 border border-white p-2 `}
+          >
+            <button>
+              <FaSearch />
+            </button>
+            <input
+              className={`focus:transition-none outline-0 focus:ring-0 bg-transparent border-0 transition-all w-full px-2 ms-2 py-2" `}
+              type="text"
+              placeholder={"Wyszukaj...."}
+            />
+          </div>
+        </div>
         <ul
           className={
             "font-semibold p-4 flex flex-col gap-3 border-b border-neutral-400 text-neutral-400"
           }
         >
-          <li>Konto</li>
-          <li>Centrum pomocy</li>
-          <li>Wyloguj się</li>
+          <li>
+            <NavbarItem label={"Konto"} />
+          </li>
+          <li>
+            <NavbarItem href={"/faqPage"} label={"Centrum Pomocy"} />
+          </li>
+          <li>
+            <NavbarItem label={"Wyloguj się"} />
+          </li>
         </ul>
         <ul
           className={"font-semibold  p-4 flex flex-col gap-3 text-neutral-400"}
         >
-          <li>Strona główna</li>
-          <li>Seriale</li>
-          <li>Filmy</li>
-          <li>Nowe i Popularne</li>
-          <li>Moja lista</li>
+          <li>
+            <NavbarItem
+              href={"/"}
+              hoverOff
+              className={
+                currentPageState === "homePage"
+                  ? "border-s-4 border-red-600 ps-3"
+                  : ""
+              }
+              currentPage={currentPageState === "homePage"}
+              onClick={() => setCurrentPage("homePage")}
+              label={"Strona Główna"}
+            />
+          </li>
+          <li>
+            <NavbarItem
+              href={"#"}
+              hoverOff
+              className={
+                currentPageState === "seriesPage"
+                  ? "border-s-4 border-red-600 ps-3"
+                  : ""
+              }
+              currentPage={currentPageState === "seriesPage"}
+              onClick={() => setCurrentPage("seriesPage")}
+              label={"Seriale"}
+            />
+          </li>
+          <li>
+            <NavbarItem
+              href={"#"}
+              hoverOff
+              className={
+                currentPageState === "moviesPage"
+                  ? "border-s-4 border-red-600 ps-3"
+                  : ""
+              }
+              currentPage={currentPageState === "moviesPage"}
+              onClick={() => setCurrentPage("moviesPage")}
+              label={"Filmy"}
+            />
+          </li>
+          <li>
+            <NavbarItem
+              href={"#"}
+              hoverOff
+              className={
+                currentPageState === "newAndPopularPage"
+                  ? "border-s-4 border-red-600 ps-3"
+                  : ""
+              }
+              currentPage={currentPageState === "newAndPopularPage"}
+              onClick={() => setCurrentPage("newAndPopularPage")}
+              label={"Nowe i Popularne"}
+            />
+          </li>
+          <li>
+            <NavbarItem
+              href={"/myList"}
+              hoverOff
+              className={
+                currentPageState === "myListPage"
+                  ? "border-s-4 border-red-600 ps-3"
+                  : ""
+              }
+              currentPage={currentPageState === "myListPage"}
+              onClick={() => setCurrentPage("myListPage")}
+              label={"Moja lista"}
+            />
+          </li>
         </ul>
       </Offcanvas>
     </nav>

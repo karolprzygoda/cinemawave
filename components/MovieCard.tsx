@@ -9,22 +9,27 @@ export default function MovieCard({ data }: { data: Record<string, any> }) {
   const { openModal } = useInfoModal();
 
   return (
-    <div className={"group bg-zin-900 col-span relative h-[12vw]"}>
+    <div
+      className={"group bg-zin-900 col-span relative aspect-video"}
+      onClick={() => {
+        if (window.innerWidth < 1023) openModal(data?.id);
+      }}
+    >
       <img
         className={
-          "cursor-pointer object-cover transition duration shadow-xl rounded-md group-hover:opacity-90 sm:group-hover:opacity-0 delay-300 w-full h-[12vw]"
+          "cursor-pointer object-cover transition duration shadow-xl rounded-md group-hover:opacity-90 lg:group-hover:opacity-0 delay-300 w-full aspect-video"
         }
         src={data.thumbnailUrl}
         alt="Thumnail"
       />
       <div
         className={
-          "opacity-0 absolute top-0 transition duration-200 z-10 invisible sm:visible delay-300 w-full scale-0 group-hover:scale-110 group-hover:-translate-y-[6vw] group-hover:translate-x-[2vw] group-hover:opacity-100"
+          "opacity-0 absolute top-0 transition duration-200 z-10 w-screen  invisible lg:visible delay-300 lg:w-full scale-0 group-hover:scale-110 group-hover:-translate-y-[6vw]  group-hover:opacity-100"
         }
       >
         <img
           className={
-            "cursor-pointer object-cover transition duration shadow-xl rounded-t-md w-full h-[12vw]"
+            "cursor-pointer object-cover transition duration shadow-xl rounded-t-md w-full aspect-video"
           }
           src={data.thumbnailUrl}
           alt="Thumbnail"

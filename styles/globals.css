@@ -13,6 +13,7 @@ body {
 html {
   @apply h-full;
   font-family: "Netflix Sans", sans-serif;
+  scroll-behavior: smooth !important;
 }
 
 @font-face {
@@ -49,5 +50,78 @@ html {
   100% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes moveArrow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(10px);
+  }
+}
+
+.animate-arrow {
+  animation: moveArrow 0.5s ease-in-out 2;
+}
+
+@layer utilities {
+  .bg-custom-radial {
+    background: radial-gradient(
+      300% 100% at center top,
+      rgba(169, 185, 250, 0.15) 0%,
+      rgba(251, 251, 251, 0) 25%
+    );
+  }
+}
+
+@layer utilities {
+  .input-border {
+    background: linear-gradient(
+      to right,
+      #e50914 -0.08%,
+      #c94ff5 81.14%,
+      #5b79f1 99.92%
+    );
+    animation: gradient 5s ease infinite;
+  }
+}
+
+@layer utilities {
+  .search-input-wrapper {
+    animation: 300ms cubic-bezier(0.5, 0, 0.2, 1) 0s 1 normal none running
+      animation;
+  }
+}
+
+@keyframes animation {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes gradient {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@media screen and (max-width: 830px) {
+  .bg-custom-radial {
+    background: radial-gradient(
+      300% 50% at center top,
+      rgba(169, 185, 250, 0.15) 0%,
+      rgba(251, 251, 251, 0) 25%
+    );
   }
 }

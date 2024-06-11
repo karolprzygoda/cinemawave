@@ -13,7 +13,7 @@ export default function Billboard() {
   }, [openModal, data?.id]);
 
   return (
-    <div className={"relative mt-[-88px] h-[56.25vw"}>
+    <div className={"hidden min-[870px]:block relative mt-[-88px] h-[56.25vw"}>
       <video
         className={"w-full h-[56.25vw] object-cover brightness-[60%]"}
         src={data?.videoUrl}

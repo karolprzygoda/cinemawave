@@ -32,11 +32,7 @@ export default function Footer() {
                 "basis-[calc(50%-0.75rem)] lg:basis-[calc(25%-0.75rem)]"
               }
             >
-              <Link
-                href="#"
-                target={"_blank"}
-                className={"underline hover:text-white"}
-              >
+              <Link href="/faqPage" className={"underline hover:text-white"}>
                 Często zadawane pytania
               </Link>
             </li>

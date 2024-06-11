@@ -103,6 +103,7 @@ export default function Login() {
                 errorMessage={errors.password!}
               />
               <button
+                type={"submit"}
                 className={
                   "py-3  bg-red-600 text-white rounded-md w-full hover:bg-red-700 transition"
                 }

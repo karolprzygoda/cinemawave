@@ -2,6 +2,7 @@ import { signOut } from "next-auth/react";
 import { MouseEventHandler } from "react";
 import useMountTransition from "@/hooks/useMountTransition";
 import useCurrentUser from "@/hooks/useCurrentUser";
+import Link from "next/link";
 
 export default function AccountMenu({
   isOpen,
@@ -25,7 +26,7 @@ export default function AccountMenu({
         <div
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
-          className={` bg-black w-56 absolute top-14 right-0 py-5 flex-col border-2 border-gray-800 flex transition duration-300 ${
+          className={` bg-black opacity-80 w-56 absolute top-14 right-0 py-5 flex-col border-2 border-gray-800 flex transition duration-300 ${
             hasTransitionedIn && isOpen ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -41,6 +42,14 @@ export default function AccountMenu({
               </p>
             </div>
             <hr className={"bg-gray-600 border-0 h-px my-4"} />
+            <Link
+              href={"/faqPage"}
+              className={
+                "px-3 mb-4 text-center text-white text-sm hover:underline"
+              }
+            >
+              Centrum pomocy
+            </Link>
             <button
               type={"button"}
               onClick={() => signOut()}

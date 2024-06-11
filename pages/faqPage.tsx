@@ -2,7 +2,7 @@ import Accordion from "@/components/Accordion";
 import { FaSearch } from "react-icons/fa";
 import Link from "next/link";
 import { FaArrowDown, FaRegEnvelope } from "react-icons/fa6";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import {
   LuMegaphone,
   LuMonitorSmartphone,
@@ -23,7 +23,7 @@ export default function FaqPage() {
   const ref = useRef<HTMLDivElement | null>(null);
   const [showHeader, setShowHeader] = useState(false);
 
-  const checkVisibility = () => {
+  const checkVisibility = useCallback(() => {
     const element = document.getElementById("heroSearchInput");
     const rect = element!.getBoundingClientRect();
     const viewHeight = Math.max(
@@ -31,15 +31,15 @@ export default function FaqPage() {
       window.innerHeight,
     );
     return !(rect.bottom < 0 || rect.top - viewHeight >= 0);
-  };
+  }, []);
 
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (!checkVisibility()) {
       setShowHeader(true);
     } else {
       setShowHeader(false);
     }
-  };
+  }, [checkVisibility]);
 
   useEffect(() => {
     const element = document.querySelector("#indexWrapper");
@@ -48,7 +48,7 @@ export default function FaqPage() {
     return () => {
       element!.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [handleScroll]);
 
   const executeScroll = () => {
     if (ref.current) {

@@ -164,14 +164,12 @@ export default function Navbar() {
           <NavbarItem
             onClick={() => setCurrentPage("homePage")}
             currentPage={currentPageState === "homePage"}
-            className={""}
             href={"/"}
             label={"Strona główna"}
           />
           <NavbarItem
             onClick={() => setCurrentPage("seriesPage")}
             currentPage={currentPageState === "seriesPage"}
-            className={""}
             href={"#"}
             label={"Seriale"}
           />

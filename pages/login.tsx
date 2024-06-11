@@ -32,7 +32,7 @@ export default function Login() {
         console.log(error);
       }
     },
-    [],
+    [router],
   );
 
   const schema = yup.object().shape({

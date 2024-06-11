@@ -8,6 +8,7 @@ import { useWindowSize } from "react-use";
 import SearchInput from "@/components/SearchInput";
 import useMountTransition from "@/hooks/useMountTransition";
 import { signOut } from "next-auth/react";
+import useCurrentUser from "@/hooks/useCurrentUser";
 
 const TOP_OFFSET = 66;
 
@@ -18,6 +19,8 @@ export default function Navbar() {
   const [showOffcanvas, setShowOffcanvas] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [currentPageState, setCurrentPageState] = useState("homePage");
+
+  const { data } = useCurrentUser();
 
   const handleCloseOffcanvas = () => setShowOffcanvas(false);
 
@@ -245,7 +248,7 @@ export default function Navbar() {
             alt="profile"
           />
           <div>
-            <div className={"text-sm"}>Username</div>
+            <div className={"text-sm"}>{data?.name}</div>
             <div className={"text-xs"}>Przełącz profile</div>
           </div>
         </div>

@@ -25,7 +25,7 @@ export default function SearchInput() {
       <input
         onBlur={handleClick}
         ref={inputRef}
-        className={`focus:transition-none outline-0 focus:ring-0 bg-transparent border-0 transition-all ${clicked ? "max-[1400px]:w-32 w-60 px-2 ms-2 py-1" : "w-0  p-0"}`}
+        className={`focus:transition-none outline-0 focus:ring-0 bg-transparent border-0 transition-all ${clicked ? " w-60 px-2 ms-2 py-1" : "w-0  p-0"}`}
         type="text"
         placeholder={"Wyszukaj...."}
       />

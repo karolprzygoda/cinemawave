@@ -9,6 +9,7 @@ import SearchInput from "@/components/SearchInput";
 import useMountTransition from "@/hooks/useMountTransition";
 import { signOut } from "next-auth/react";
 import useCurrentUser from "@/hooks/useCurrentUser";
+import Logo from "@/components/Logo";
 
 const TOP_OFFSET = 66;
 
@@ -91,11 +92,7 @@ export default function Navbar() {
       <div
         className={`px-4 md:px-16 py-6 flex items-center duration-500 ${showBackground ? " bg-zinc-900 bg-opacity-90" : ""} `}
       >
-        <img
-          className={"h-6 lg:h-10 cursor-pointer"}
-          src="/images/logo.png"
-          alt="logo"
-        />
+        <Logo />
         <div className={"ml-8 relative hidden lg:inline xl:hidden"}>
           <button
             type={"button"}

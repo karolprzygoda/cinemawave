@@ -1,8 +1,7 @@
 import Accordion from "@/components/Accordion";
-import { FaSearch } from "react-icons/fa";
 import Link from "next/link";
 import { FaArrowDown, FaRegEnvelope } from "react-icons/fa6";
-import { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
   LuMegaphone,
   LuMonitorSmartphone,
@@ -17,11 +16,14 @@ import {
 } from "react-icons/md";
 import { RxHamburgerMenu } from "react-icons/rx";
 import Footer from "@/components/Footer";
+import FaqSearchInput from "@/components/FaqSearchInput";
+import Logo from "@/components/Logo";
 
 export default function FaqPage() {
   const [isHovered, setIsHovered] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
   const [showHeader, setShowHeader] = useState(false);
+  const [value, setValue] = useState("");
 
   const checkVisibility = useCallback(() => {
     const element = document.getElementById("heroSearchInput");
@@ -56,56 +58,43 @@ export default function FaqPage() {
     }
   };
 
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(event.target.value);
+  };
+
   return (
     <div
-      style={{ backgroundColor: "#121212" }}
-      className={"w-screen h-screen  overflow-x-auto "}
+      className={"w-screen h-screen  overflow-x-auto bg-[#121212]"}
       id={"indexWrapper"}
     >
       <div className={"min-w-[280px] "}>
         {showHeader && (
           <div
             className={
-              "search-input-wrapper w-full py-6 border-b border-neutral-800 sticky top-0 bg-[#121212] px-3"
+              "search-input-wrapper w-full py-6 border-b border-neutral-800 sticky top-0 bg-[#121212] px-3 z-[999]"
             }
           >
-            <div
-              className={` flex  input-border   relative rounded max-w-[600px] mx-auto`}
-              style={{ padding: "2px" }}
-            >
-              <button
-                className={
-                  "absolute top-1/2  transform  -translate-y-1/2 left-5"
-                }
-              >
-                <FaSearch size={20} className={"text-white"} />
-              </button>
-              <input
-                className={`rounded w-full outline-0 focus:ring-0  border-0 py-3 pe-4 ps-14 bg-[#4c4948] text-white placeholder-neutral-300`}
-                type="text"
-                placeholder={"Wpisz pytanie, temat lub problem"}
-              />
-            </div>
+            <FaqSearchInput
+              id={"searchInput"}
+              value={value}
+              onChange={handleChange}
+            />
           </div>
         )}
         <div
           className={"w-full bg-[181414] px-4 md:px-16 py-6 flex items-center"}
         >
-          <Link href={"/"}>
-            <img
-              className={
-                "h-6 lg:h-10 cursor-pointer pe-6 border-e border-neutral-500"
-              }
-              src="/images/logo.png"
-              alt="logo"
-            />
-          </Link>
+          <Logo className={"border-e border-neutral-500"} />
           <h2 className={"text-white font-bold text-md sm:text-xl ms-6"}>
             Centrum Pomocy
           </h2>
         </div>
         <div className={"h-full w-full bg-custom-radial "}>
-          <div className={"mb-12 flex flex-col justify-center h-[795px]"}>
+          <div
+            className={
+              "mb-12 flex flex-col justify-center h-[600px] md:h-[795px]"
+            }
+          >
             <section className={"py-12 px-3 flex flex-1 flex-col w-full"}>
               <div className={"w-full  max-w-[600px] m-auto"}>
                 <h1
@@ -115,25 +104,12 @@ export default function FaqPage() {
                 >
                   Jak możemy Ci pomóc?
                 </h1>
-                <div
-                  className={` flex  input-border  mb-6 relative rounded`}
-                  style={{ padding: "2px" }}
-                >
-                  <button
-                    className={
-                      "absolute top-1/2  transform  -translate-y-1/2 left-5"
-                    }
-                  >
-                    <FaSearch size={20} className={"text-white"} />
-                  </button>
-                  <input
-                    id={"heroSearchInput"}
-                    className={`rounded w-full outline-0 focus:ring-0  border-0 py-3 pe-4 ps-14 bg-[#4c4948] text-white placeholder-neutral-300`}
-                    type="text"
-                    placeholder={"Wpisz pytanie, temat lub problem"}
-                  />
-                </div>
-                <div className={"text-center text-neutral-300"}>
+                <FaqSearchInput
+                  id={"heroSearchInput"}
+                  value={value}
+                  onChange={handleChange}
+                />
+                <div className={"text-center text-neutral-300 mt-6"}>
                   <span className={"font-semibold"}>Polecane dla Ciebie:</span>
                   &nbsp;
                   <Link className={"underline"} href={"#"}>
@@ -165,7 +141,7 @@ export default function FaqPage() {
               />
             </div>
           </div>
-          <div
+          <section
             className={
               "max-w-[600px] mx-auto px-2 font-semibold text-white mb-14"
             }
@@ -283,7 +259,11 @@ export default function FaqPage() {
                     sint voluptatibus.
                   </div>
                 </Accordion.Item>
-                <Accordion.Item value={4} trigger={"Problemy z oglądaniem"}>
+                <Accordion.Item
+                  isLast
+                  value={4}
+                  trigger={"Problemy z oglądaniem"}
+                >
                   <div>
                     Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad
                     aut beatae debitis distinctio earum incidunt ipsa labore
@@ -450,8 +430,8 @@ export default function FaqPage() {
                 </Accordion.Item>
               </Accordion>
             </div>
-          </div>
-          <div className={"w-full  max-w-[600px] m-auto px-2 mb-14"}>
+          </section>
+          <section className={"w-full  max-w-[600px] m-auto px-2 mb-14"}>
             <h3 className={"text-white font-semibold text-[18px] mb-3"}>
               Szybkie łącza
             </h3>
@@ -505,8 +485,8 @@ export default function FaqPage() {
                 <a href="#">Sprawdź historię płatności</a>
               </li>
             </ul>
-          </div>
-          <div className={"w-full max-w-[600px] px-2 mx-auto mb-14"}>
+          </section>
+          <section className={"w-full max-w-[600px] px-2 mx-auto mb-14"}>
             <h3
               className={
                 "text-white font-semibold text-[20px] text-center mb-4"
@@ -522,7 +502,7 @@ export default function FaqPage() {
             >
               Skontaktuj się z nami
             </a>
-          </div>
+          </section>
         </div>
         <Footer />
       </div>

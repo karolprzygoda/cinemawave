@@ -87,7 +87,7 @@ export default function Login() {
                 value={values.email}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                isInvalid={touched.email! && !!errors.email}
+                isInvalid={(touched.email! && !!errors.email) || !userExists}
                 isValid={touched.email! && !errors.email}
                 errorMessage={errors.email!}
               />
@@ -98,7 +98,9 @@ export default function Login() {
                 value={values.password}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                isInvalid={touched.password! && !!errors.password}
+                isInvalid={
+                  (touched.password! && !!errors.password) || !userExists
+                }
                 isValid={touched.password! && !errors.password}
                 errorMessage={errors.password!}
               />

@@ -15,15 +15,11 @@ export default function MovieList({
   return (
     <div className={"px-6 md:px-12 mt-6 md:mt-10 space-y-8 overflow-y-visible"}>
       <div>
-        <p
-          className={
-            "text-white text-md md:text-xl lg:text-2xl font-semibold mb-4"
-          }
-        >
+        <p className={"text-white text-xl md:text-2xl font-semibold mb-4"}>
           {title}
         </p>
         <div
-          className={"grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-8"}
+          className={"grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-8"}
         >
           {data.map((movie: any) => (
             <MovieCard key={movie.id} data={movie} />

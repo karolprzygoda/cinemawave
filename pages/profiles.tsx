@@ -36,11 +36,11 @@ const Profiles = () => {
             Kto ogląda?
           </h1>
           <div className="flex items-center justify-center gap-8 mt-10">
-            <div onClick={() => router.push("/")}>
-              <div className="group flex-row w-44 mx-auto">
+            <button onClick={() => router.push("/")}>
+              <div className="group flex-row  mx-auto">
                 <div className=" rounded-md flex items-center justify-center border-2 border-transparent group-hover:cursor-pointer group-hover:border-white overflow-hidden">
                   <img
-                    className={"w-[10vw]  min-w-28 aspect-auto"}
+                    className={"w-[8vw]  min-w-28 aspect-auto"}
                     src="/images/default-blue.png"
                     alt="Profile"
                   />
@@ -49,7 +49,7 @@ const Profiles = () => {
                   {user?.name}
                 </div>
               </div>
-            </div>
+            </button>
           </div>
         </div>
       )}

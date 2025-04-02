@@ -6,108 +6,198 @@ import {
   Dispatch,
   HTMLAttributes,
   ReactNode,
+  RefObject,
   SetStateAction,
   useContext,
+  useRef,
   useState,
 } from "react";
 import { cn } from "@/lib/utils";
 import useMountTransition from "@/hooks/use-mount-transition";
 
-type DropdownMenuContexValues = {
+type DropdownMenuContextValues = {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
   hasTransitionedIn: boolean;
+  variant: "onClick" | "onHover";
+  leaveTimeout: RefObject<NodeJS.Timeout | null>;
+  clearLeaveTimeout: () => void;
 };
 
-const DropdownMenuContex = createContext<DropdownMenuContexValues | null>(null);
+const DropdownMenuContext = createContext<DropdownMenuContextValues | null>(
+  null,
+);
 
 type DropdownMenuProps = {
   children: ReactNode;
+  variant?: "onClick" | "onHover";
 };
 
-const DropdownMenu = ({ children }: DropdownMenuProps) => {
+const DropdownMenu = ({ variant = "onClick", children }: DropdownMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const hasTransitionedIn = useMountTransition(isOpen, 300);
 
+  const leaveTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const clearLeaveTimeout = () => {
+    if (leaveTimeout.current) {
+      clearTimeout(leaveTimeout.current);
+      leaveTimeout.current = null;
+    }
+  };
+
   return (
-    <DropdownMenuContex.Provider
-      value={{ isOpen, setIsOpen, hasTransitionedIn }}
+    <DropdownMenuContext.Provider
+      value={{
+        isOpen,
+        setIsOpen,
+        hasTransitionedIn,
+        variant,
+        leaveTimeout,
+        clearLeaveTimeout,
+      }}
     >
-      <div className={"relative"}>{children}</div>
-    </DropdownMenuContex.Provider>
+      <div className={"group relative"}>{children}</div>
+    </DropdownMenuContext.Provider>
   );
 };
 
-type DropdownMenuTriggerProps = ButtonHTMLAttributes<HTMLButtonElement>;
+type DropdownMenuTriggerProps = {
+  className?: string;
+  children: ReactNode;
+} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className" | "children">;
 
-const DropdownMenuTrigger = ({ ...props }: DropdownMenuTriggerProps) => {
-  const context = useContext(DropdownMenuContex);
+const DropdownMenuTrigger = ({
+  className,
+  children,
+
+  ...props
+}: DropdownMenuTriggerProps) => {
+  const context = useContext(DropdownMenuContext);
 
   if (!context) {
     throw new Error("DropdownMenuTrigger has to be child of DropDownMenu!");
   }
 
-  const { setIsOpen } = context;
+  const { variant, setIsOpen, leaveTimeout, clearLeaveTimeout, isOpen } =
+    context;
 
   const handleClick = () => {
     setIsOpen((prev) => !prev);
   };
 
+  const handleOnMouseEnter = () => {
+    if (variant === "onHover") {
+      clearLeaveTimeout();
+      setIsOpen(true);
+    }
+  };
+
+  const handleOnMouseLeave = () => {
+    if (variant === "onHover") {
+      leaveTimeout.current = setTimeout(() => {
+        setIsOpen(false);
+      }, 300);
+    }
+  };
+
   return (
     <button
+      className={cn("cursor-pointer", className)}
+      onClick={variant === "onClick" ? handleClick : () => {}}
+      onMouseEnter={variant === "onHover" ? handleOnMouseEnter : undefined}
+      onMouseLeave={variant === "onHover" ? handleOnMouseLeave : undefined}
+      aria-haspopup="menu"
+      aria-expanded={isOpen}
+      aria-controls="dropdown-menu"
       {...props}
-      className={cn("cursor-pointer", props.className)}
-      onClick={handleClick}
     >
-      {props.children}
+      {children}
     </button>
   );
 };
 
-type DropdownMenuContentProps = HTMLAttributes<HTMLUListElement>;
+type DropdownMenuContentProps = {
+  className?: string;
+  children: ReactNode;
+} & Omit<HTMLAttributes<HTMLUListElement>, "className" | "children">;
 
-const DropdownMenuContent = ({ ...props }: DropdownMenuContentProps) => {
-  const context = useContext(DropdownMenuContex);
+const DropdownMenuContent = ({
+  className,
+  children,
+  ...props
+}: DropdownMenuContentProps) => {
+  const context = useContext(DropdownMenuContext);
 
   if (!context) {
     throw new Error("DropdownMenuTrigger has to be child of DropDownMenu!");
   }
 
-  const { isOpen, hasTransitionedIn } = context;
+  const { isOpen, hasTransitionedIn, variant, setIsOpen, clearLeaveTimeout } =
+    context;
+
+  const handleOnMouseEnter = () => {
+    if (variant === "onHover") {
+      clearLeaveTimeout();
+      setIsOpen(true);
+    }
+  };
+
+  const handleOnMouseLeave = () => {
+    if (variant === "onHover") {
+      setIsOpen(false);
+    }
+  };
 
   if (!(hasTransitionedIn || isOpen)) return null;
 
   return (
     <ul
       className={cn(
-        "absolute top-14 right-0 flex w-56 flex-col gap-3 border border-neutral-800 bg-black/90 py-5 opacity-0 transition duration-300",
+        "absolute top-14 right-0 flex w-56 flex-col gap-3 border border-neutral-800 bg-black/90 py-3 opacity-0 transition duration-300",
         hasTransitionedIn && isOpen && "opacity-100",
         hasTransitionedIn && !isOpen && "opacity-0",
-        props.className,
+        className,
       )}
+      onMouseEnter={handleOnMouseEnter}
+      onMouseLeave={handleOnMouseLeave}
+      role="menu"
+      id="dropdown-menu"
       {...props}
     >
-      {props.children}
+      {children}
     </ul>
   );
 };
 
-type DropdownMenuItemProps = HTMLAttributes<HTMLLIElement>;
+type DropdownMenuItemProps = {
+  className?: string;
+  children: ReactNode;
+} & Omit<HTMLAttributes<HTMLLIElement>, "className" | "children">;
 
-const DropdownMenuItem = ({ ...props }: DropdownMenuItemProps) => {
+const DropdownMenuItem = ({
+  className,
+  children,
+  ...props
+}: DropdownMenuItemProps) => {
   return (
-    <li className={cn("", props.className)} {...props}>
-      {props.children}
+    <li className={className} role="menuitem" tabIndex={-1} {...props}>
+      {children}
     </li>
   );
 };
 
-type DropdownMenuSeparatorProps = HTMLAttributes<HTMLHRElement>;
+type DropdownMenuSeparatorProps = {
+  className?: string;
+} & Omit<HTMLAttributes<HTMLHRElement>, "className">;
 
-const DropdownMenuSeparator = ({ ...props }: DropdownMenuSeparatorProps) => {
+const DropdownMenuSeparator = ({
+  className,
+  ...props
+}: DropdownMenuSeparatorProps) => {
   return (
     <hr
-      className={cn("h-[1px] w-full border-neutral-800", props.className)}
+      className={cn("h-[1px] w-full border-neutral-800", className)}
       {...props}
     />
   );

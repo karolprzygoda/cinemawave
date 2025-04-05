@@ -1,5 +1,11 @@
+import Billboard from "@/components/billboard";
+
 const Page = () => {
-  return <></>;
+  return (
+    <>
+      <Billboard />
+    </>
+  );
 };
 
 export default Page;

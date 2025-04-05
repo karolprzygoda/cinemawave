@@ -21,8 +21,8 @@ const Header = () => {
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 flex h-20 w-full items-center justify-between from-[rgba(0,0,0,0.7)] from-10% to-transparent px-4 py-6 duration-500 md:px-16",
-        scrolled ? "bg-background" : "bg-gradient-to-b",
+        "sticky top-0 z-30 flex h-20 w-full items-center justify-between px-4 py-6 transition-all duration-400 before:absolute before:inset-0 before:z-[-1] before:bg-gradient-to-b before:from-[rgba(0,0,0,0.7)] before:from-10% before:to-transparent before:transition-opacity before:duration-400 before:content-[''] md:px-16",
+        scrolled ? "bg-background before:opacity-0" : "before:opacity-100",
       )}
     >
       <div className={"flex items-center gap-8"}>
@@ -33,7 +33,7 @@ const Header = () => {
               href={item.href}
               className={cn(
                 buttonVariants({ variant: "linkGlow", size: "auto" }),
-                "text-muted-foreground",
+                "text-[#e5e5e5]",
               )}
               key={item.href + "-" + index}
             >

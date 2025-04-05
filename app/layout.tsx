@@ -1,16 +1,31 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
+import localFont from "next/font/local";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const netflix = localFont({
+  src: [
+    {
+      path: "../public/fonts/NetflixSans_W_Rg.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/NetflixSans_W_Md.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/NetflixSans_W_Md.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/NetflixSans_W_Bd.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
 });
 
 export const metadata: Metadata = {
@@ -25,9 +40,7 @@ type RootLayoutProps = {
 const RootLayout = ({ children }: RootLayoutProps) => {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} bg-background min-h-screen antialiased`}
-      >
+      <body className={`${netflix.className} bg-background min-h-screen antialiased`}>
         {children}
       </body>
     </html>

@@ -1,10 +1,18 @@
 import Header from "@/components/header";
+import { ReactNode } from "react";
+import Footer from "@/components/footer";
 
-const BrowseLayout = () => {
+type BrowseLayoutProps = {
+  children: Readonly<ReactNode>;
+};
+
+const BrowseLayout = ({ children }: BrowseLayoutProps) => {
   return (
-    <div className={"min-h-screen bg-[#181818]"}>
+    <>
       <Header />
-    </div>
+      {children}
+      <Footer />
+    </>
   );
 };
 

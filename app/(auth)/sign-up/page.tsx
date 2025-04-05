@@ -1,19 +1,23 @@
 "use client";
 
 import {
+  AuthForm,
   AuthFormContainer,
   AuthFormError,
+  AuthFormFooter,
   AuthFormHeader,
   AuthFormSubmitButton,
+  OAuthButton,
+  OAuthButtonsWrapper,
 } from "@/components/auth-form";
 import Input from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signUpSchema, SignUpSchemaType } from "@/schemas/auth-schema";
 import Link from "next/link";
-import { signUp } from "@/actions/auth-actions";
-import GithubOAuthButton from "@/components/github-oauth-button";
-import GoogleOAuthButton from "@/components/google-oauth-button";
+import { signInWithGithub, signInWithGoogle, signUp } from "@/actions/auth-actions";
+import { FaGithub, FaGoogle } from "react-icons/fa";
+import { buttonVariants } from "@/components/ui/button";
 
 const SignUpPage = () => {
   const {
@@ -39,14 +43,14 @@ const SignUpPage = () => {
   return (
     <AuthFormContainer>
       <AuthFormError>{errors.root?.message}</AuthFormError>
-      <AuthFormHeader label={"Sign up"} />
-      <form onSubmit={handleSubmit(onSubmit)} className={"flex flex-col gap-5"}>
+      <AuthFormHeader>Sign Up</AuthFormHeader>
+      <AuthForm onSubmit={handleSubmit(onSubmit)}>
         <Input
           label={"Email"}
           type={"text"}
           invalid={!!errors.email}
           errorMessage={errors.email?.message}
-          {...register("email", { required: true })}
+          {...register("email")}
         />
         <Input
           label={"Name"}
@@ -76,23 +80,18 @@ const SignUpPage = () => {
           errorMessage={errors.confirmPassword?.message}
           {...register("confirmPassword")}
         />
-        <AuthFormSubmitButton label={"Sign up"} isLoading={isLoading} />
-      </form>
-      <div className={"my-5 flex items-center justify-center gap-4"}>
-        <GoogleOAuthButton setError={setError} />
-        <GithubOAuthButton setError={setError} />
-      </div>
-      <div className={"flex flex-wrap justify-center gap-2"}>
-        <span className={"text-neutral-400"}>Already have an account?</span>
-        <Link
-          href={"/sign-in"}
-          className={
-            "inline cursor-pointer text-white underline underline-offset-5"
-          }
-        >
+        <AuthFormSubmitButton isLoading={isLoading}>Sign up</AuthFormSubmitButton>
+      </AuthForm>
+      <OAuthButtonsWrapper>
+        <OAuthButton Icon={FaGithub} signInWithOAuth={signInWithGithub} setError={setError} />
+        <OAuthButton Icon={FaGoogle} signInWithOAuth={signInWithGoogle} setError={setError} />
+      </OAuthButtonsWrapper>
+      <AuthFormFooter>
+        <span>Already have an account?</span>
+        <Link href={"/sign-in"} className={buttonVariants({ variant: "link", size: "auto" })}>
           Sign in
         </Link>
-      </div>
+      </AuthFormFooter>
     </AuthFormContainer>
   );
 };

@@ -1,19 +1,23 @@
 "use client";
 
 import {
+  AuthForm,
   AuthFormContainer,
   AuthFormError,
+  AuthFormFooter,
   AuthFormHeader,
   AuthFormSubmitButton,
+  OAuthButton,
+  OAuthButtonsWrapper,
 } from "@/components/auth-form";
 import Input from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, SignInSchemaType } from "@/schemas/auth-schema";
 import Link from "next/link";
-import { signIn } from "@/actions/auth-actions";
-import GithubOAuthButton from "@/components/github-oauth-button";
-import GoogleOAuthButton from "@/components/google-oauth-button";
+import { signIn, signInWithGithub, signInWithGoogle } from "@/actions/auth-actions";
+import { FaGithub, FaGoogle } from "react-icons/fa";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 const SignInPage = () => {
   const {
@@ -38,9 +42,9 @@ const SignInPage = () => {
 
   return (
     <AuthFormContainer>
-      <AuthFormHeader label={"Sign in"} />
+      <AuthFormHeader>Sign in</AuthFormHeader>
       <AuthFormError>{errors.root?.message}</AuthFormError>
-      <form onSubmit={handleSubmit(onSubmit)} className={"flex flex-col gap-5"}>
+      <AuthForm onSubmit={handleSubmit(onSubmit)}>
         <Input
           label={"Email"}
           type={"text"}
@@ -55,23 +59,20 @@ const SignInPage = () => {
           errorMessage={errors.password?.message}
           {...register("password")}
         />
-        <AuthFormSubmitButton label={"Sign in"} isLoading={isLoading} />
-      </form>
-      <div className={"my-5 flex items-center justify-center gap-4"}>
-        <GoogleOAuthButton setError={setError} />
-        <GithubOAuthButton setError={setError} />
-      </div>
-      <div className={"flex flex-wrap justify-center gap-2"}>
-        <span className={"text-neutral-400"}>Don&#39;t have an account?</span>
-        <Link
-          href={"/sign-up"}
-          className={
-            "inline cursor-pointer text-white underline underline-offset-5"
-          }
-        >
+        <AuthFormSubmitButton isLoading={isLoading}>Sign in</AuthFormSubmitButton>
+      </AuthForm>
+      <span className={"text-muted-foreground my-3 block w-full text-center"}>OR</span>
+      <Button variant={"secondary"}>Sign in as Guest</Button>
+      <OAuthButtonsWrapper>
+        <OAuthButton Icon={FaGithub} signInWithOAuth={signInWithGithub} setError={setError} />
+        <OAuthButton Icon={FaGoogle} signInWithOAuth={signInWithGoogle} setError={setError} />
+      </OAuthButtonsWrapper>
+      <AuthFormFooter>
+        <span>Don&#39;t have an account?</span>
+        <Link href={"/sign-up"} className={buttonVariants({ variant: "link", size: "auto" })}>
           Sign up
         </Link>
-      </div>
+      </AuthFormFooter>
     </AuthFormContainer>
   );
 };

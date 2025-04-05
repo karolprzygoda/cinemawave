@@ -1,6 +1,8 @@
-import React, { ReactNode } from "react";
+import React, { HTMLProps, ReactNode } from "react";
 import { IconType } from "react-icons";
 import { PulseLoader } from "react-spinners";
+import { Button } from "@/components/ui/button";
+import { EmptyObject, UseFormSetError } from "react-hook-form";
 
 type AuthFormContainerProps = {
   children: ReactNode;
@@ -10,7 +12,7 @@ const AuthFormContainer = ({ children }: AuthFormContainerProps) => {
   return (
     <main
       className={
-        "mx-auto w-full rounded-md bg-black/75 px-4 py-12 lg:my-20 lg:max-w-md lg:px-10"
+        "rounded-radius mx-auto flex w-full flex-col bg-black/75 px-4 py-12 lg:my-28 lg:max-w-md lg:px-10"
       }
     >
       {children}
@@ -19,29 +21,40 @@ const AuthFormContainer = ({ children }: AuthFormContainerProps) => {
 };
 
 type OAuthButtonProps = {
-  onClick: () => void;
   Icon: IconType;
+  setError: UseFormSetError<EmptyObject>;
+  signInWithOAuth: () => Promise<{ errorMessage: string } | undefined>;
 };
 
-const OAuthButton = ({ onClick, Icon }: OAuthButtonProps) => {
+const OAuthButton = ({ Icon, setError, signInWithOAuth }: OAuthButtonProps) => {
+  const handleOAuthSignIn = async () => {
+    const error = await signInWithOAuth();
+    if (error) {
+      setError("root", {
+        type: "manual",
+        message: error.errorMessage,
+      });
+    }
+  };
+
   return (
-    <button
-      onClick={onClick}
-      className={
-        "flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white transition hover:opacity-80"
-      }
+    <Button
+      onClick={handleOAuthSignIn}
+      variant={"fab"}
+      size={"fab"}
+      aria-label={Icon.name + "sign in button"}
     >
-      <Icon size={30} />
-    </button>
+      <Icon />
+    </Button>
   );
 };
 
 type AuthFormHeaderProps = {
-  label: string;
+  children: ReactNode;
 };
 
-const AuthFormHeader = ({ label }: AuthFormHeaderProps) => {
-  return <h2 className={"mb-8 text-4xl font-semibold text-white"}>{label}</h2>;
+const AuthFormHeader = ({ children }: AuthFormHeaderProps) => {
+  return <h2 className={"mb-8 text-4xl font-semibold"}>{children}</h2>;
 };
 
 type AuthFormErrorProps = {
@@ -53,27 +66,52 @@ const AuthFormError = ({ children }: AuthFormErrorProps) => {
     return null;
   }
 
-  return <div className={`mb-8 rounded-md bg-yellow-600 p-3`}>{children}</div>;
+  return <div className={`bg-warning text-accent-foreground mb-8 rounded-md p-3`}>{children}</div>;
 };
 
 type AuthFormSubmitButtonProps = {
   isLoading: boolean;
-  label: string;
+  children: string;
 };
 
-const AuthFormSubmitButton = ({
-  isLoading,
-  label,
-}: AuthFormSubmitButtonProps) => {
+const AuthFormSubmitButton = ({ isLoading, children }: AuthFormSubmitButtonProps) => {
   return (
-    <button
-      type={"submit"}
-      className={
-        "w-full cursor-pointer rounded-md bg-red-600 py-3 font-semibold text-white transition hover:bg-red-700"
-      }
-    >
-      {isLoading ? <PulseLoader color={"#fff"} size={10} /> : label}
-    </button>
+    <Button type={"submit"}>
+      {isLoading ? <PulseLoader color={"#fff"} size={10} /> : children}
+    </Button>
+  );
+};
+
+type OAuthButtonsWrapper = {
+  children: ReactNode;
+};
+
+const OAuthButtonsWrapper = ({ children }: OAuthButtonsWrapper) => {
+  return <div className={"my-5 flex items-center justify-center gap-4"}>{children}</div>;
+};
+
+type AuthFormFooterProps = {
+  children: ReactNode;
+};
+
+const AuthFormFooter = ({ children }: AuthFormFooterProps) => {
+  return (
+    <div className={"text-muted-foreground flex flex-wrap items-center justify-center gap-2"}>
+      {children}
+    </div>
+  );
+};
+
+type AuthForm = {
+  children: ReactNode;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+} & HTMLProps<HTMLFormElement>;
+
+const AuthForm = ({ children, onSubmit, ...rest }: AuthForm) => {
+  return (
+    <form onSubmit={onSubmit} className={"flex flex-col gap-5"} {...rest}>
+      {children}
+    </form>
   );
 };
 
@@ -83,4 +121,7 @@ export {
   AuthFormError,
   OAuthButton,
   AuthFormSubmitButton,
+  OAuthButtonsWrapper,
+  AuthFormFooter,
+  AuthForm,
 };

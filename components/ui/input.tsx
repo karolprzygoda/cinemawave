@@ -1,21 +1,19 @@
 "use client";
 
-import React, {
-  HTMLInputTypeAttribute,
-  InputHTMLAttributes,
-  useState,
-} from "react";
+import React, { HTMLInputTypeAttribute, InputHTMLAttributes, useState } from "react";
 import { cn } from "@/lib/utils";
 import { IoMdCloseCircleOutline, IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { IconType } from "react-icons";
+import { Button } from "@/components/ui/button";
 
 type InputProps = {
   label: string;
   invalid?: boolean;
   errorMessage?: string;
+  type?: HTMLInputTypeAttribute;
 } & InputHTMLAttributes<HTMLInputElement>;
 
-const Input = ({ label, invalid, errorMessage, ...props }: InputProps) => {
+const Input = ({ label, invalid, errorMessage, type, ...props }: InputProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleToggleShowPassword = () => {
@@ -26,26 +24,26 @@ const Input = ({ label, invalid, errorMessage, ...props }: InputProps) => {
     <div className={"flex flex-col gap-1.5"}>
       <div
         className={cn(
-          "relative rounded-md border border-neutral-600 bg-neutral-900/70 focus-within:border-white",
-          invalid ? "border-red-600" : "",
+          "border-border focus-within:border-foreground rounded-radius bg-background/70 relative border",
+          invalid && "border-destructive",
         )}
       >
         <input
-          {...props}
-          className={`peer w-full bg-transparent px-2.5 ps-4 pt-5 pb-2.5 text-white focus:outline-0`}
+          className={`peer w-full bg-transparent px-2.5 ps-4 pt-5 pb-2.5 focus:outline-0`}
           placeholder=" "
           id={props.name}
           aria-invalid={invalid}
-          type={showPassword ? "text" : props.type}
+          type={showPassword ? "text" : type}
+          {...props}
         />
         <label
           htmlFor={props.name}
-          className="absolute start-4 top-4 z-10 origin-[0] -translate-y-4 scale-75 transform text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-4 peer-focus:scale-75 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4 dark:text-gray-400"
+          className="text-muted-foreground absolute start-4 top-4 z-10 origin-[0] -translate-y-4 scale-75 transform cursor-text duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-4 peer-focus:scale-75 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4"
         >
           {label}
         </label>
         <TogglePassword
-          type={props.type}
+          type={type}
           handleTogglePassword={handleToggleShowPassword}
           Icon={showPassword ? IoMdEyeOff : IoMdEye}
         />
@@ -61,22 +59,19 @@ type TogglePasswordProps = {
   handleTogglePassword: () => void;
 };
 
-const TogglePassword = ({
-  type,
-  Icon,
-  handleTogglePassword,
-}: TogglePasswordProps) => {
+const TogglePassword = ({ type, Icon, handleTogglePassword }: TogglePasswordProps) => {
   if (type !== "password") return null;
 
   return (
-    <button
-      type={"button"}
+    <Button
+      variant={"fab"}
+      size={"auto"}
       onClick={handleTogglePassword}
-      className="absolute end-2 top-2.5 flex cursor-pointer items-center justify-center rounded-full p-2 transition hover:bg-neutral-500"
+      className="hover:bg-border-muted text-muted-foreground absolute end-2 top-2.5 bg-transparent p-2"
       aria-label={Icon === IoMdEye ? "Show password" : "Hide password"}
     >
-      <Icon className="text-xl text-white" />
-    </button>
+      <Icon />
+    </Button>
   );
 };
 
@@ -90,7 +85,7 @@ const InputErrorMessage = ({ message }: InputErrorMessageProps) => {
   }
 
   return (
-    <div className="flex items-center gap-1 text-sm whitespace-pre-wrap text-red-600">
+    <div className="text-destructive flex items-center gap-1 text-sm whitespace-pre-wrap">
       <IoMdCloseCircleOutline size={18} />
       {message}
     </div>

@@ -19,7 +19,7 @@ const SignOutButton = ({ className, ...props }: SignOutButton) => {
 
   return (
     <button
-      className={cn("cursor-pointer", className)}
+      className={cn("inline-flex cursor-pointer", className)}
       onClick={handleSignOut}
       {...props}
     >

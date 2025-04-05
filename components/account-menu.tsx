@@ -5,98 +5,142 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Image from "next/image";
 import Link from "next/link";
 import { IoIosHelpCircleOutline } from "react-icons/io";
 import { AiOutlineUser } from "react-icons/ai";
-import { PiPencilLight } from "react-icons/pi";
-import { IconType } from "react-icons";
 import SignOutButton from "@/components/sign-out-button";
 import { FaCaretDown } from "react-icons/fa";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import {
+  Offcanvas,
+  OffcanvasContent,
+  OffcanvasHeader,
+  OffcanvasTrigger,
+} from "@/components/ui/offcanvas";
+import Avatar from "@/components/ui/avatar";
+import { NAVBAR_LINKS } from "@/components/header";
+import { cn } from "@/lib/utils";
+import { IconType } from "react-icons";
+import { GoChevronRight } from "react-icons/go";
+import { MdOutlineExitToApp } from "react-icons/md";
 
 const ACCOUNT_MENU_LINKS = [
-  { href: "#", label: "Manage profiles", Icon: PiPencilLight },
   { href: "#", label: "Account", Icon: AiOutlineUser },
   { href: "/faq", label: "Help center", Icon: IoIosHelpCircleOutline },
 ];
 
 const AccountMenu = () => {
-  return (
-    <DropdownMenu variant={"onHover"}>
-      <DropdownMenuTrigger className={"relative flex items-center gap-2"}>
-        <Image
-          width={24}
-          height={24}
-          className={"h-6 w-6 rounded-md lg:h-10 lg:w-10"}
-          src="/images/default-blue.png"
-          alt="profile"
-        />
-        <FaCaretDown
-          className={`hidden rotate-0 text-white transition duration-300 group-hover:rotate-180 lg:block [@media(hover:hover)]:delay-300 [@media(hover:hover)]:group-hover:delay-0`}
-        />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className={"text-sm text-white"}>
-        <AccountMenuProfileItem
-          href={"#"}
-          profileName={"Karol"}
-          imgSrc={"/images/default-blue.png"}
-        />
-        {ACCOUNT_MENU_LINKS.map((item, index) => (
-          <AccountMenuNavItem
-            key={item.href + "-" + index}
-            href={item.href}
-            label={item.label}
-            Icon={item.Icon}
+  const isDesktop = useMediaQuery("(min-width: 1280px)");
+
+  if (isDesktop) {
+    return (
+      <DropdownMenu variant={"onHover"}>
+        <DropdownMenuTrigger className={"flex items-center gap-2"}>
+          <Avatar src={"/images/default-blue.png"} />
+          <FaCaretDown
+            className={`hidden rotate-0 transition duration-300 group-hover:rotate-180 lg:block [@media(hover:hover)]:delay-300 [@media(hover:hover)]:group-hover:delay-0`}
           />
-        ))}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <SignOutButton className={"w-full text-center hover:underline"}>
-            Sign out
-          </SignOutButton>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>
+            <SwitchProfileButton
+              href={"#"}
+              profileName={"Karol"}
+              avatarSrc={"/images/default-blue.png"}
+            />
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          {ACCOUNT_MENU_LINKS.map((item, index) => (
+            <DropdownMenuItem key={item.href + "-" + index}>
+              <Link href={item.href} className={"flex items-center gap-2 hover:underline"}>
+                <item.Icon className={"text-muted-foreground mx-1"} size={24} />
+                {item.label}
+              </Link>
+            </DropdownMenuItem>
+          ))}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>
+            <SignOutButton className={"w-full justify-center hover:underline"}>
+              Sign out
+            </SignOutButton>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
 
-type AccountMenuNavItemProps = {
-  href: string;
-  label: string;
-  Icon: IconType;
-};
-
-const AccountMenuNavItem = ({ href, label, Icon }: AccountMenuNavItemProps) => {
   return (
-    <DropdownMenuItem className={"px-[10px] py-[5px]"}>
-      <Link href={href} className={"flex items-center gap-2 hover:underline"}>
-        <Icon className={"mx-1 text-neutral-400"} size={24} />
-        {label}
-      </Link>
-    </DropdownMenuItem>
+    <Offcanvas>
+      <OffcanvasTrigger>
+        <Avatar src={"/images/default-blue.png"} />
+      </OffcanvasTrigger>
+      <OffcanvasContent>
+        <OffcanvasHeader>
+          <SwitchProfileButton
+            href={"#"}
+            profileName={"Karol"}
+            avatarSrc={"/images/default-blue.png"}
+          />
+        </OffcanvasHeader>
+        <nav className={"divide-border-muted flex flex-col divide-y text-nowrap first:border-0"}>
+          <NavList navList={NAVBAR_LINKS.map((item) => ({ ...item, Icon: GoChevronRight }))} />
+          <NavList navList={ACCOUNT_MENU_LINKS} />
+        </nav>
+        <SignOutButton
+          className={"hover:bg-muted flex w-full items-center justify-between px-4 py-3"}
+        >
+          Sign Out <MdOutlineExitToApp size={20} />
+        </SignOutButton>
+      </OffcanvasContent>
+    </Offcanvas>
   );
 };
 
-type AccountMenuProfileItemProps = {
+type NavListProps = {
+  navList: { label: string; href: string; Icon: IconType }[];
+};
+
+const NavList = ({ navList }: NavListProps) => {
+  return (
+    <ul className={"flex flex-col"}>
+      {navList.map((item, index) => (
+        <li
+          className={"hover:bg-muted cursor-pointer px-4 py-3 transition"}
+          key={item.href + "-" + index}
+        >
+          <Link className={"flex items-center justify-between"} href={item.href}>
+            {item.label}
+            <item.Icon size={20} />
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+type SwitchProfileButtonProps = {
   href: string;
-  imgSrc: string;
   profileName: string;
+  avatarSrc: string;
+  className?: string;
 };
 
-const AccountMenuProfileItem = ({
+const SwitchProfileButton = ({
   href,
-  imgSrc,
   profileName,
-}: AccountMenuProfileItemProps) => {
+  avatarSrc,
+  className,
+}: SwitchProfileButtonProps) => {
   return (
-    <DropdownMenuItem className={"px-[10px] py-[5px]"}>
-      <Link href={href} className={"flex items-center gap-2 hover:underline"}>
-        <div className={"relative h-8 w-8"}>
-          <Image fill className={"rounded-md"} src={imgSrc} alt="userIcon" />
-        </div>
-        {profileName}
-      </Link>
-    </DropdownMenuItem>
+    <Link href={href} className={cn("group/profile relative flex items-center gap-4", className)}>
+      <Avatar src={avatarSrc} />
+      <div className={"flex flex-col"}>
+        <span className={"text-lg"}>{profileName}</span>
+        <span className={"text-secondary text-sm group-hover/profile:underline"}>
+          Switch Profiles
+        </span>
+      </div>
+    </Link>
   );
 };
 

@@ -1,1 +1,56 @@
 @import "tailwindcss";
+
+:root {
+    --radius: 0.25rem;
+    --background: oklch(0.20 0 0);
+    --foreground: oklch(0.92 0 0);
+    --card: oklch(0.23 0.0062 17.61);
+    --card-foreground: oklch(1 0 0);
+    --card-secondary: oklch(0.31 0 0);
+    --card-secondary-foreground: oklch(0.86 0 0);
+    --primary: oklch(0.59 0.2367 28.14);
+    --primary-foreground: oklch(0.92 0 0);
+    --destructive: oklch(0.62 0.2132 23.68);
+    --warning: oklch(0.681 0.162 75.834);
+    --secondary: oklch(0.6 0 0);
+    --secondary-foreground: oklch(1 0 0);
+    --muted: oklch(0 0 0 / 70%);
+    --muted-foreground: oklch(1 0 0 / 70%);
+    --accent: oklch(1 0 0);
+    --accent-foreground: oklch(0 0 0);
+    --border: oklch(0.6 0 0);
+    --border-muted: oklch(0.26 0 0);
+    --ring: oklch(1 0 0);
+}
+
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-ring: var(--ring);
+    --color-border: var(--border);
+    --color-border-muted: var(--border-muted);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-destructive: var(--destructive);
+    --color-warning: var(--warning);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-card-secondary-foreground: var(--card-secondary-foreground);
+    --color-card-secondary: var(--card-secondary);
+    --radius-radius: var(--radius);
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
+}

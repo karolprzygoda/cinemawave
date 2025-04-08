@@ -21,7 +21,7 @@ const Header = () => {
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 flex h-20 w-full items-center justify-between px-4 py-6 transition-all duration-400 before:absolute before:inset-0 before:z-[-1] before:bg-gradient-to-b before:from-[rgba(0,0,0,0.7)] before:from-10% before:to-transparent before:transition-opacity before:duration-400 before:content-[''] md:px-16",
+        "sticky top-0 z-[999] flex h-18 w-full items-center justify-between px-4 py-6 transition-all duration-400 before:absolute before:inset-0 before:z-[-1] before:bg-gradient-to-b before:from-[rgba(0,0,0,0.7)] before:from-10% before:to-transparent before:transition-opacity before:duration-400 before:content-[''] md:px-16",
         scrolled ? "bg-background before:opacity-0" : "before:opacity-100",
       )}
     >
@@ -31,10 +31,7 @@ const Header = () => {
           {NAVBAR_LINKS.map((item, index) => (
             <Link
               href={item.href}
-              className={cn(
-                buttonVariants({ variant: "linkGlow", size: "auto" }),
-                "text-[#e5e5e5]",
-              )}
+              className={buttonVariants({ variant: "linkGlow", size: "auto" })}
               key={item.href + "-" + index}
             >
               {item.label}

@@ -55,24 +55,7 @@
     }
 }
 
-.xd {
-    position: absolute; /* albo relative, zależnie od kontekstu */
-    background-image: linear-gradient(
-            180deg,
-            hsla(0, 0%, 8%, 0) 0,
-            hsla(0, 0%, 8%, 0.15) 15%,
-            hsla(0, 0%, 8%, 0.35) 29%,
-            hsla(0, 0%, 8%, 0.58) 44%,
-            #141414 68%,
-            #141414
-    );
-    background-position: 0 top;
-    background-repeat: repeat-x;
-    background-size: 100% 100%;
-    bottom: -1px;
-    height: 14.7vw;
-    z-index: 20;
-    opacity: 1;
-    top: auto;
-    width: 100%;
+.scrollbar-off{
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }

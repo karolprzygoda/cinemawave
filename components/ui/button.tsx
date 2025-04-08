@@ -8,8 +8,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-primary hover:bg-primary/80",
-        secondary: "bg-secondary/40 hover:bg-secondary/30",
+        primary: "bg-primary hover:bg-primary/80 text-accent",
+        secondary: "bg-secondary/70 hover:bg-secondary/50 text-accent",
         accent: "bg-accent text-accent-foreground hover:bg-accent/80",
         outline:
           "border border-border bg-transparent text-secondary hover:bg-foreground hover:text-foreground",
@@ -26,6 +26,7 @@ const buttonVariants = cva(
         sm: "h-9 px-3",
         lg: "h-11 px-8",
         xl: "h-13 px-10",
+        xxl: "text-2xl px-8 py-3 [&_svg]:size-7 font-bold",
         fab: "h-10 w-10",
         auto: "h-auto w-auto",
       },

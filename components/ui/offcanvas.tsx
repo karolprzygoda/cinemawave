@@ -97,7 +97,7 @@ const OffcanvasContent = ({ className, side = "left", children }: OffcanvasConte
   const show = hasTransitionedIn && isOpen;
 
   const baseClasses =
-    "fixed z-50 gap-4 bg-background shadow-lg transition ease-in-out border-border-muted bg-background transition-transform duration-300";
+    "fixed z-[9999] gap-4 bg-background shadow-lg transition ease-in-out border-border-muted bg-background transition-transform duration-300";
 
   const sideClasses = {
     left: "inset-y-0 left-0 h-full w-full border-r sm:max-w-sm",
@@ -146,7 +146,7 @@ const OffcanvasBackDrop = () => {
   return (
     <div
       className={cn(
-        "fixed top-0 right-0 z-50 h-screen w-screen bg-black/70 opacity-0 transition duration-300",
+        "fixed top-0 right-0 z-[9999] h-screen w-screen bg-black/70 opacity-0 transition duration-300",
         show && "opacity-100",
       )}
       onClick={handleClose}

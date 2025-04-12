@@ -100,7 +100,7 @@ const OffcanvasContent = ({ className, side = "left", children }: OffcanvasConte
     "fixed z-[9999] gap-4 bg-background shadow-lg transition ease-in-out border-border-muted bg-background transition-transform duration-300";
 
   const sideClasses = {
-    left: "inset-y-0 left-0 h-full w-full border-r sm:max-w-sm",
+    left: "inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm",
     right: "inset-y-0 right-0 h-full w-full border-l sm:max-w-sm",
   };
 

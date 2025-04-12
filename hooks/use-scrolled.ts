@@ -11,6 +11,10 @@ const useScrolled = (scrollY = 20) => {
       }
     };
 
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [scrollY, scrolled]);

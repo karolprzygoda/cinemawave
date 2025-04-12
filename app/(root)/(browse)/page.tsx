@@ -26,6 +26,7 @@ const Page = async () => {
     <>
       <Billboard data={randomMovie} />
       <TopTenSection movies={tmdbMovies} />
+      <TopTenSection movies={tmdbMovies} />
     </>
   );
 };

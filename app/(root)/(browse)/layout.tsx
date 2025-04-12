@@ -11,7 +11,7 @@ const BrowseLayout = ({ children }: BrowseLayoutProps) => {
     <>
       <Header />
       {children}
-      {/*<Footer />*/}
+      <Footer />
     </>
   );
 };

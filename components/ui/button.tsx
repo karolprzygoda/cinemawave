@@ -15,7 +15,7 @@ const buttonVariants = cva(
           "border border-border bg-transparent text-secondary hover:bg-foreground hover:text-foreground",
         fab: "rounded-full! bg-accent text-accent-foreground hover:bg-accent/80",
         fabOutline:
-          "rounded-full! bg-transparent border border-border text-secondary hover:bg-foreground hover:text-foreground",
+          "rounded-full! bg-transparent border-2 border-border text-secondary  hover:text-foreground",
         link: "hover:underline text-foreground",
         linkStatic: "underline",
         linkGlow: "hover:text-accent",
@@ -27,7 +27,7 @@ const buttonVariants = cva(
         lg: "h-11 px-8",
         xl: "h-13 px-10",
         xxl: "text-2xl px-8 py-3 [&_svg]:size-7 font-bold",
-        fab: "h-10 w-10",
+        fab: "h-12 w-12",
         auto: "h-auto w-auto",
       },
     },

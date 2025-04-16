@@ -3,27 +3,36 @@
 import {
   ButtonHTMLAttributes,
   createContext,
-  Dispatch,
   HTMLAttributes,
   ReactNode,
-  SetStateAction,
   useContext,
-  useEffect,
   useState,
 } from "react";
 import { cn } from "@/lib/utils";
-import useMountTransition from "@/hooks/use-mount-transition";
 import { createPortal } from "react-dom";
 import { useHydration } from "@/hooks/use-hydration";
 import useKeyPress from "@/hooks/use-key-press";
+import useHideAppOverflow from "@/hooks/use-hide-app-overflow";
+import useUnmountAnimation from "@/hooks/use-unmount-animation";
+
+const ANIMATION_DURATION = 300;
 
 type OffcanvasContextProps = {
-  isOpen: boolean;
-  setIsOpen: Dispatch<SetStateAction<boolean>>;
-  hasTransitionedIn: boolean;
+  isMounted: boolean;
+  isUnmounting: boolean;
+  handleOpen: () => void;
+  handleClose: () => void;
 };
 
 const OffcanvasContext = createContext<OffcanvasContextProps | null>(null);
+
+const useOffcanvasContext = () => {
+  const context = useContext(OffcanvasContext);
+  if (!context) {
+    throw new Error("useOffcanvasContext must be used within an OffcanvasProvider");
+  }
+  return context;
+};
 
 type OffcanvasProps = {
   children: ReactNode;
@@ -31,24 +40,22 @@ type OffcanvasProps = {
 
 const Offcanvas = ({ children }: OffcanvasProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const hasTransitionedIn = useMountTransition(isOpen, 300);
+  const { isMounted, isUnmounting } = useUnmountAnimation(isOpen, ANIMATION_DURATION);
 
-  useKeyPress("Escape", () => setIsOpen(false));
+  useHideAppOverflow(isOpen);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+  const handleOpen = () => {
+    setIsOpen(true);
+  };
 
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
+  useKeyPress("Escape", handleClose);
 
   return (
-    <OffcanvasContext.Provider value={{ isOpen, setIsOpen, hasTransitionedIn }}>
+    <OffcanvasContext.Provider value={{ isMounted, isUnmounting, handleOpen, handleClose }}>
       {children}
     </OffcanvasContext.Provider>
   );
@@ -57,23 +64,13 @@ const Offcanvas = ({ children }: OffcanvasProps) => {
 type OffcanvasTriggerProps = {
   className?: string;
   children: ReactNode;
-} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className" | "children">;
+} & ButtonHTMLAttributes<HTMLButtonElement>;
 
 const OffcanvasTrigger = ({ className, children, ...props }: OffcanvasTriggerProps) => {
-  const context = useContext(OffcanvasContext);
-
-  if (!context) {
-    throw new Error("OffcanvasTrigger has to be child of Offcanvas!");
-  }
-
-  const { setIsOpen } = context;
-
-  const handleClick = () => {
-    setIsOpen(true);
-  };
+  const { handleOpen } = useOffcanvasContext();
 
   return (
-    <button className={cn("cursor-pointer", className)} onClick={handleClick} {...props}>
+    <button className={cn("cursor-pointer", className)} onClick={handleOpen} {...props}>
       {children}
     </button>
   );
@@ -83,74 +80,65 @@ type OffcanvasContentProps = {
   className?: string;
   side?: "left" | "right";
   children: ReactNode;
-} & Omit<HTMLAttributes<HTMLUListElement>, "className" | "children">;
+} & HTMLAttributes<HTMLDivElement>;
 
-const OffcanvasContent = ({ className, side = "left", children }: OffcanvasContentProps) => {
-  const context = useContext(OffcanvasContext);
+const OffcanvasContent = ({
+  className,
+  side = "left",
+  children,
+  ...props
+}: OffcanvasContentProps) => {
+  const { isMounted, isUnmounting } = useOffcanvasContext();
 
-  if (!context) {
-    throw new Error("OffcanvasContent has to be child of Offcanvas!");
-  }
-
-  const { isOpen, hasTransitionedIn } = context;
-
-  const show = hasTransitionedIn && isOpen;
-
-  const baseClasses =
-    "fixed z-[9999] gap-4 bg-background shadow-lg transition ease-in-out border-border-muted bg-background transition-transform duration-300";
+  const baseClasses = "fixed z-[9999] gap-4 bg-background shadow-lg border-border-muted ";
 
   const sideClasses = {
     left: "inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm",
-    right: "inset-y-0 right-0 h-full w-full border-l sm:max-w-sm",
+    right: "inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm",
   };
 
-  const translateClasses = {
-    left: show ? "translate-x-0" : "-translate-x-full",
-    right: show ? "translate-x-0" : "translate-x-full",
+  const animation = {
+    left: isUnmounting ? "animate-slide-out-ltr" : "animate-slide-in-ltr",
+    right: isUnmounting ? "animate-slide-out-rtl" : "animate-slide-in-rtl",
   };
+
+  if (!isMounted) return null;
 
   return (
     <OffcanvasPortal>
-      {(hasTransitionedIn || isOpen) && (
-        <>
-          <OffcanvasBackDrop />
-          <div
-            className={cn(baseClasses, sideClasses[side], translateClasses[side], className)}
-            aria-hidden={!isOpen}
-            aria-label="Side panel"
-            role="dialog"
-          >
-            {children}
-          </div>
-        </>
-      )}
+      <OffcanvasBackDrop />
+      <div
+        className={cn(baseClasses, sideClasses[side], animation[side], className)}
+        style={{
+          animationDuration: `${ANIMATION_DURATION}ms`,
+        }}
+        aria-hidden={!isMounted}
+        aria-label="Side panel"
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
+        {...props}
+      >
+        {children}
+      </div>
     </OffcanvasPortal>
   );
 };
 
 const OffcanvasBackDrop = () => {
-  const context = useContext(OffcanvasContext);
-
-  if (!context) {
-    throw new Error("OffcanvasBackDrop has to be child of Offcanvas!");
-  }
-
-  const { isOpen, setIsOpen, hasTransitionedIn } = context;
-
-  const show = hasTransitionedIn && isOpen;
-
-  const handleClose = () => {
-    setIsOpen(false);
-  };
+  const { isMounted, isUnmounting, handleClose } = useOffcanvasContext();
 
   return (
     <div
       className={cn(
-        "fixed top-0 right-0 z-[9999] h-screen w-screen bg-black/70 opacity-0 transition duration-300",
-        show && "opacity-100",
+        "fixed top-0 right-0 z-[9999] h-screen w-screen bg-black/70",
+        isUnmounting ? "animate-fade-out" : "animate-fade-in",
       )}
+      style={{
+        animationDuration: `${ANIMATION_DURATION}ms`,
+      }}
       onClick={handleClose}
-      aria-hidden={!isOpen}
+      aria-hidden={!isMounted}
       aria-label="Backdrop"
     ></div>
   );
@@ -159,23 +147,13 @@ const OffcanvasBackDrop = () => {
 type OffcanvasCloseButtonProps = {
   className?: string;
   children: ReactNode;
-} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className" | "children">;
+} & ButtonHTMLAttributes<HTMLButtonElement>;
 
-const OffcanvasCloseButton = ({ className, children }: OffcanvasCloseButtonProps) => {
-  const context = useContext(OffcanvasContext);
-
-  if (!context) {
-    throw new Error("OffcanvasContent has to be child of Offcanvas!");
-  }
-
-  const { setIsOpen } = context;
-
-  const handleClose = () => {
-    setIsOpen(false);
-  };
+const OffcanvasCloseButton = ({ className, children, ...props }: OffcanvasCloseButtonProps) => {
+  const { handleClose } = useOffcanvasContext();
 
   return (
-    <button className={cn("cursor-pointer", className)} onClick={handleClose}>
+    <button className={cn("cursor-pointer", className)} onClick={handleClose} {...props}>
       {children}
     </button>
   );
@@ -184,11 +162,14 @@ const OffcanvasCloseButton = ({ className, children }: OffcanvasCloseButtonProps
 type OffcanvasHeaderProps = {
   className?: string;
   children: ReactNode;
-} & Omit<HTMLAttributes<HTMLDivElement>, "className" | "children">;
+} & HTMLAttributes<HTMLDivElement>;
 
-const OffcanvasHeader = ({ className, children }: OffcanvasHeaderProps) => {
+const OffcanvasHeader = ({ className, children, ...props }: OffcanvasHeaderProps) => {
   return (
-    <div className={cn("border-border-muted flex flex-col space-y-2 border-b p-4", className)}>
+    <div
+      className={cn("border-border-muted flex flex-col space-y-2 border-b p-4", className)}
+      {...props}
+    >
       {children}
     </div>
   );

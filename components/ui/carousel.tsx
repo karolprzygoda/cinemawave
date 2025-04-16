@@ -42,7 +42,7 @@ const Carousel = ({ children, options }: CarouselProps) => {
 
   return (
     <CarouselContext.Provider value={{ emblaApi, isPrevButtonDisabled, setIsPrevButtonDisabled }}>
-      <div className={"group relative"}>
+      <div className={"group/carousel relative"}>
         <div className={"overflow-hidden"} ref={emblaRef}>
           {children}
         </div>
@@ -70,16 +70,15 @@ const CarouselIndex = () => {
     setScrollSnaps(emblaApi.scrollSnapList());
   }, []);
 
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
+  const onSelect = useCallback((emblaApi: EmblaCarouselType) => {
     setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
+  }, []);
 
   useEffect(() => {
     if (!emblaApi) return;
     onInit(emblaApi);
-    emblaApi.on("reInit", onInit);
-    emblaApi.on("select", onSelect);
+    onSelect(emblaApi);
+    emblaApi.on("reInit", onSelect).on("select", onSelect);
   }, [emblaApi, onInit, onSelect]);
 
   return (
@@ -104,10 +103,13 @@ type CarouselButtonProps = {
 const CarouselButton = ({ type }: CarouselButtonProps) => {
   const { emblaApi, isPrevButtonDisabled, setIsPrevButtonDisabled } = useCarouselContext();
 
+  const isPrev = type === "prev";
+
   const handleClick = () => {
     if (!emblaApi) return;
-    if (type === "prev") emblaApi.scrollPrev();
-    if (type === "next") {
+    if (isPrev) {
+      emblaApi.scrollPrev();
+    } else {
       emblaApi.scrollNext();
       setIsPrevButtonDisabled(false);
     }
@@ -116,16 +118,17 @@ const CarouselButton = ({ type }: CarouselButtonProps) => {
   return (
     <button
       onClick={handleClick}
+      aria-label={isPrev ? "Previous slide" : "Next slide"}
+      disabled={isPrevButtonDisabled && isPrev}
       className={cn(
-        "group/button absolute top-0 z-20 hidden h-full w-[4%] cursor-pointer items-center justify-center bg-[hsla(0,0%,8%,0.5)] text-[3vw] transition hover:bg-[hsla(0,0%,8%,0.7)] lg:flex",
-        type === "prev" ? "left-0" : "right-0",
-        isPrevButtonDisabled && type === "prev" && "hidden!",
+        "group/carousel-button absolute top-0 z-20 hidden h-full w-[4%] cursor-pointer items-center justify-center bg-[hsla(0,0%,8%,0.5)] text-[3vw] transition hover:bg-[hsla(0,0%,8%,0.7)] disabled:hidden lg:flex",
+        isPrev ? "left-0" : "right-0",
       )}
     >
       <CgChevronRight
         className={cn(
-          "origin-center transform opacity-0 transition-transform group-hover:opacity-100 group-hover/button:scale-125",
-          type === "prev" && "rotate-180",
+          "origin-center transform opacity-0 transition-transform group-hover/carousel:opacity-100 group-hover/carousel-button:scale-125 group-focus/carousel-button:opacity-100",
+          isPrev && "rotate-180",
         )}
       />
     </button>

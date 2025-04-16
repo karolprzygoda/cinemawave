@@ -1,30 +1,47 @@
 "use client";
 
+//TODO dodac nawigacje miedzy elementami za pomoca strzalek
+
 import React, {
   ButtonHTMLAttributes,
   createContext,
-  Dispatch,
   HTMLAttributes,
   ReactNode,
-  RefObject,
-  SetStateAction,
   useContext,
   useRef,
   useState,
 } from "react";
 import { cn } from "@/lib/utils";
-import useMountTransition from "@/hooks/use-mount-transition";
+import useTimeout from "@/hooks/use-timeout";
+import useUnmountAnimation from "@/hooks/use-unmount-animation";
+import useKeyPress from "@/hooks/use-key-press";
+import useOnClickOutside from "@/hooks/use-onclick-outside";
+
+const ANIMATION_DURATION = 300;
+
+const DROPDOWN_ALIGNMENT = {
+  left: "left-0",
+  right: "right-0",
+  center: "left-1/2 -translate-x-1/2",
+};
 
 type DropdownMenuContextValues = {
-  isOpen: boolean;
-  setIsOpen: Dispatch<SetStateAction<boolean>>;
-  hasTransitionedIn: boolean;
-  variant: "onClick" | "onHover";
-  leaveTimeout: RefObject<NodeJS.Timeout | null>;
-  clearLeaveTimeout: () => void;
+  isMounted: boolean;
+  isUnmounting: boolean;
+  handleOpen: () => void;
+  handleClose: () => void;
+  handleOnClickOpen: () => void;
 };
 
 const DropdownMenuContext = createContext<DropdownMenuContextValues | null>(null);
+
+const useDropdownMenuContext = () => {
+  const context = useContext(DropdownMenuContext);
+  if (!context) {
+    throw new Error("useDropdownMenuContext must be used within a DropdownMenuProvider");
+  }
+  return context;
+};
 
 type DropdownMenuProps = {
   children: ReactNode;
@@ -32,87 +49,92 @@ type DropdownMenuProps = {
   variant?: "onClick" | "onHover";
 };
 
-const DropdownMenu = ({ variant = "onClick", className, children }: DropdownMenuProps) => {
+const DropdownMenu = ({ children, className, variant = "onClick" }: DropdownMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const hasTransitionedIn = useMountTransition(isOpen, 300);
-  const leaveTimeout = useRef<NodeJS.Timeout | null>(null);
+  const { isMounted, isUnmounting } = useUnmountAnimation(isOpen, ANIMATION_DURATION);
+  const closeTimeout = useTimeout();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const clearLeaveTimeout = () => {
-    if (leaveTimeout.current) {
-      clearTimeout(leaveTimeout.current);
-      leaveTimeout.current = null;
-    }
+  const handleOpen = () => {
+    closeTimeout.clear();
+    setIsOpen(true);
   };
 
-  return (
-    <DropdownMenuContext.Provider
-      value={{
-        isOpen,
-        setIsOpen,
-        hasTransitionedIn,
-        variant,
-        leaveTimeout,
-        clearLeaveTimeout,
-      }}
-    >
-      <div className={cn("group relative", className)}>{children}</div>
-    </DropdownMenuContext.Provider>
-  );
-};
+  const handleClose = () => {
+    closeTimeout.clear();
+    setIsOpen(false);
+  };
 
-type DropdownMenuTriggerProps = {
-  className?: string;
-  children: ReactNode;
-} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className" | "children">;
-
-const DropdownMenuTrigger = ({ className, children, ...props }: DropdownMenuTriggerProps) => {
-  const context = useContext(DropdownMenuContext);
-
-  if (!context) {
-    throw new Error("DropdownMenuTrigger must be a child of DropdownMenu!");
-  }
-
-  const { variant, setIsOpen, leaveTimeout, clearLeaveTimeout, isOpen } = context;
-
-  const handleClick = () => {
+  const handleOnClickOpen = () => {
     if (variant === "onClick") {
       setIsOpen((prev) => !prev);
     }
   };
 
-  const handleOnMouseEnter = () => {
+  const handleOnHoverOpen = () => {
     if (variant === "onHover") {
-      clearLeaveTimeout();
-      setIsOpen(true);
+      closeTimeout.clear();
+      handleOpen();
     }
   };
 
-  const handleOnMouseLeave = () => {
+  const handleOnHoverClose = () => {
     if (variant === "onHover") {
-      leaveTimeout.current = setTimeout(() => {
-        setIsOpen(false);
-      }, 300);
+      closeTimeout.clear();
+      closeTimeout.set(() => setIsOpen(false), ANIMATION_DURATION);
     }
   };
+
+  useKeyPress("Escape", handleClose);
+  useOnClickOutside(dropdownRef, handleClose);
+
+  return (
+    <DropdownMenuContext.Provider
+      value={{
+        isMounted,
+        isUnmounting,
+        handleOpen,
+        handleClose,
+        handleOnClickOpen,
+      }}
+    >
+      <div
+        ref={dropdownRef}
+        onMouseEnter={handleOnHoverOpen}
+        onMouseLeave={handleOnHoverClose}
+        className={cn("relative", className)}
+      >
+        {children}
+      </div>
+    </DropdownMenuContext.Provider>
+  );
+};
+
+type DropdownMenuTriggerProps = {
+  children: ReactNode;
+  className?: string;
+} & ButtonHTMLAttributes<HTMLButtonElement>;
+
+const DropdownMenuTrigger = ({ children, className, ...props }: DropdownMenuTriggerProps) => {
+  const { isMounted, handleOpen, handleOnClickOpen } = useDropdownMenuContext();
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") {
       e.preventDefault();
-      setIsOpen(true);
-    } else if (e.key === "Escape") {
-      setIsOpen(false);
+      handleOpen();
     }
   };
 
   return (
     <button
-      className={cn("cursor-pointer", className)}
-      onClick={handleClick}
-      onMouseEnter={handleOnMouseEnter}
-      onMouseLeave={handleOnMouseLeave}
+      className={cn(
+        "group/dropdown-trigger flex cursor-pointer items-center justify-center",
+        className,
+      )}
+      onClick={handleOnClickOpen}
       onKeyDown={handleKeyDown}
       aria-haspopup="menu"
-      aria-expanded={isOpen}
+      aria-expanded={isMounted}
       aria-controls={"dropdown-trigger"}
       {...props}
     >
@@ -122,67 +144,34 @@ const DropdownMenuTrigger = ({ className, children, ...props }: DropdownMenuTrig
 };
 
 type DropdownMenuContentProps = {
-  className?: string;
   children: ReactNode;
+  className?: string;
   align?: "left" | "right" | "center";
-  sideOffset?: number;
-} & Omit<HTMLAttributes<HTMLDivElement>, "className" | "children">;
+} & HTMLAttributes<HTMLDivElement>;
 
 const DropdownMenuContent = ({
-  className,
   children,
+  className,
   align = "right",
   ...props
 }: DropdownMenuContentProps) => {
-  const context = useContext(DropdownMenuContext);
-  if (!context) {
-    throw new Error("DropdownMenuContent must be a child of DropdownMenu!");
-  }
+  const { isMounted, isUnmounting } = useDropdownMenuContext();
 
-  const { isOpen, hasTransitionedIn, variant, setIsOpen, clearLeaveTimeout } = context;
-
-  const show = hasTransitionedIn && isOpen;
-
-  const handleOnMouseEnter = () => {
-    if (variant === "onHover") {
-      clearLeaveTimeout();
-      setIsOpen(true);
-    }
-  };
-
-  const handleOnMouseLeave = () => {
-    if (variant === "onHover") {
-      setIsOpen(false);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      setIsOpen(false);
-    }
-  };
-
-  if (!(hasTransitionedIn || isOpen)) return null;
-
-  const alignmentClasses = {
-    left: "left-0",
-    right: "right-0",
-    center: "left-1/2 -translate-x-1/2",
-  };
+  if (!isMounted) return null;
 
   return (
     <div
       className={cn(
-        "border-border-muted absolute top-14 flex w-56 flex-col gap-3 border bg-black/90 py-3 opacity-0 shadow transition duration-300",
-        alignmentClasses[align],
-        show && "opacity-100",
+        "border-border-muted absolute top-14 flex w-56 flex-col gap-3 border bg-black/90 py-3 shadow",
+        DROPDOWN_ALIGNMENT[align],
+        isUnmounting ? "animate-fade-out" : "animate-fade-in",
         className,
       )}
-      onMouseEnter={handleOnMouseEnter}
-      onMouseLeave={handleOnMouseLeave}
-      onKeyDown={handleKeyDown}
+      style={{
+        animationDuration: `${ANIMATION_DURATION}ms`,
+      }}
       role="menu"
-      aria-labelledby={"dropdown-menu"}
+      aria-label={"dropdown-menu"}
       tabIndex={-1}
       {...props}
     >
@@ -192,19 +181,16 @@ const DropdownMenuContent = ({
 };
 
 type DropdownMenuItemProps = {
-  className?: string;
   children: ReactNode;
-} & Omit<HTMLAttributes<HTMLDivElement>, "className" | "children">;
+  className?: string;
+} & HTMLAttributes<HTMLDivElement>;
 
-const DropdownMenuItem = ({ className, children, ...props }: DropdownMenuItemProps) => {
-  const context = useContext(DropdownMenuContext);
-
-  if (!context) {
-    throw new Error("DropdownMenuItem must be a child of DropdownMenu!");
-  }
+const DropdownMenuItem = ({ children, className, ...props }: DropdownMenuItemProps) => {
+  const { handleClose } = useDropdownMenuContext();
 
   return (
     <div
+      onClick={handleClose}
       className={cn("cursor-pointer px-[10px] py-[5px]", className)}
       role="menuitem"
       tabIndex={-1}
@@ -217,7 +203,7 @@ const DropdownMenuItem = ({ className, children, ...props }: DropdownMenuItemPro
 
 type DropdownMenuSeparatorProps = {
   className?: string;
-} & Omit<HTMLAttributes<HTMLHRElement>, "className">;
+} & HTMLAttributes<HTMLHRElement>;
 
 const DropdownMenuSeparator = ({ className, ...props }: DropdownMenuSeparatorProps) => {
   return (

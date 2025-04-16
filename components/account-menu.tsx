@@ -35,11 +35,8 @@ const AccountMenu = () => {
   if (isDesktop) {
     return (
       <DropdownMenu variant={"onHover"}>
-        <DropdownMenuTrigger className={"flex items-center gap-2"}>
-          <Avatar src={"/images/default-blue.png"} />
-          <FaCaretDown
-            className={`hidden rotate-0 transition duration-300 group-hover:rotate-180 lg:block [@media(hover:hover)]:delay-300 [@media(hover:hover)]:group-hover:delay-0`}
-          />
+        <DropdownMenuTrigger>
+          <AccountMenuTrigger avatarSrc={"/images/default-blue.png"} />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem>
@@ -72,7 +69,7 @@ const AccountMenu = () => {
   return (
     <Offcanvas>
       <OffcanvasTrigger>
-        <Avatar src={"/images/default-blue.png"} />
+        <AccountMenuTrigger avatarSrc={"/images/default-blue.png"} />
       </OffcanvasTrigger>
       <OffcanvasContent>
         <OffcanvasHeader>
@@ -93,6 +90,21 @@ const AccountMenu = () => {
         </SignOutButton>
       </OffcanvasContent>
     </Offcanvas>
+  );
+};
+
+type AccountMenuTriggerProps = {
+  avatarSrc: string;
+};
+
+const AccountMenuTrigger = ({ avatarSrc }: AccountMenuTriggerProps) => {
+  return (
+    <div className={"flex items-center gap-2"}>
+      <Avatar src={avatarSrc} />
+      <FaCaretDown
+        className={`hidden rotate-0 transition duration-300 group-aria-expanded/dropdown-trigger:rotate-180 lg:block`}
+      />
+    </div>
   );
 };
 

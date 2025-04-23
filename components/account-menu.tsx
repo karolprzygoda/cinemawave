@@ -102,7 +102,7 @@ const AccountMenuTrigger = ({ avatarSrc }: AccountMenuTriggerProps) => {
     <div className={"flex items-center gap-2"}>
       <Avatar src={avatarSrc} />
       <FaCaretDown
-        className={`hidden rotate-0 transition duration-300 group-aria-expanded/dropdown-trigger:rotate-180 lg:block`}
+        className={`hidden rotate-0 transition duration-300 group-aria-expanded/dropdown-trigger:rotate-180 xl:block`}
       />
     </div>
   );

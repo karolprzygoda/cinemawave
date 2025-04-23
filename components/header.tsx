@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import useScroll from "@/hooks/use-scroll";
-import useScrollRestoration from "@/hooks/use-scroll-restoration";
 
 export const NAVBAR_LINKS = [
   { href: "#", label: "Home page" },
@@ -18,7 +17,6 @@ export const NAVBAR_LINKS = [
 
 const Header = () => {
   const { y } = useScroll();
-  useScrollRestoration();
 
   return (
     <header

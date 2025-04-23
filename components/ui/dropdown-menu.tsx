@@ -1,7 +1,5 @@
 "use client";
 
-//TODO dodac nawigacje miedzy elementami za pomoca strzalek
-
 import React, {
   ButtonHTMLAttributes,
   createContext,

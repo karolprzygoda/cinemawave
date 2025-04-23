@@ -1,10 +1,9 @@
 "use client";
 
 import {
+  ButtonHTMLAttributes,
   createContext,
-  Dispatch,
   ReactNode,
-  SetStateAction,
   useCallback,
   useContext,
   useEffect,
@@ -13,12 +12,15 @@ import {
 import useEmblaCarousel from "embla-carousel-react";
 import { EmblaCarouselType, EmblaOptionsType } from "embla-carousel";
 import { cn } from "@/lib/utils";
-import { CgChevronRight } from "react-icons/cg";
+import { CgChevronLeft, CgChevronRight } from "react-icons/cg";
+import { IconType } from "react-icons";
 
 type CarouselProviderProps = {
-  emblaApi: EmblaCarouselType | undefined;
   isPrevButtonDisabled: boolean;
-  setIsPrevButtonDisabled: Dispatch<SetStateAction<boolean>>;
+  selectedIndex: number;
+  scrollSnaps: number[];
+  handleScrollPrev: () => void;
+  handleScrollNext: () => void;
 };
 
 const CarouselContext = createContext<CarouselProviderProps | null>(null);
@@ -39,9 +41,45 @@ type CarouselProps = {
 const Carousel = ({ children, options }: CarouselProps) => {
   const [emblaRef, emblaApi] = useEmblaCarousel(options);
   const [isPrevButtonDisabled, setIsPrevButtonDisabled] = useState(true);
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const onInit = useCallback((emblaApi: EmblaCarouselType) => {
+    setScrollSnaps(emblaApi.scrollSnapList());
+  }, []);
+
+  const onSelect = useCallback((emblaApi: EmblaCarouselType) => {
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, []);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onInit(emblaApi);
+    onSelect(emblaApi);
+    emblaApi.on("reInit", onSelect).on("select", onSelect);
+  }, [emblaApi, onInit, onSelect]);
+
+  const handleScrollNext = () => {
+    if (!emblaApi) return;
+    emblaApi.scrollNext();
+    setIsPrevButtonDisabled(false);
+  };
+
+  const handleScrollPrev = () => {
+    if (!emblaApi) return;
+    emblaApi.scrollPrev();
+  };
 
   return (
-    <CarouselContext.Provider value={{ emblaApi, isPrevButtonDisabled, setIsPrevButtonDisabled }}>
+    <CarouselContext.Provider
+      value={{
+        isPrevButtonDisabled,
+        selectedIndex,
+        scrollSnaps,
+        handleScrollNext,
+        handleScrollPrev,
+      }}
+    >
       <div className={"group/carousel relative"}>
         <div className={"overflow-hidden"} ref={emblaRef}>
           {children}
@@ -61,31 +99,13 @@ const CarouselContainer = ({ children, className }: CarouselContainerProps) => {
 };
 
 const CarouselIndex = () => {
-  const { emblaApi } = useCarouselContext();
-
-  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
-  const [selectedIndex, setSelectedIndex] = useState(0);
-
-  const onInit = useCallback((emblaApi: EmblaCarouselType) => {
-    setScrollSnaps(emblaApi.scrollSnapList());
-  }, []);
-
-  const onSelect = useCallback((emblaApi: EmblaCarouselType) => {
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, []);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    onInit(emblaApi);
-    onSelect(emblaApi);
-    emblaApi.on("reInit", onSelect).on("select", onSelect);
-  }, [emblaApi, onInit, onSelect]);
+  const { selectedIndex, scrollSnaps } = useCarouselContext();
 
   return (
     <ul className={"absolute top-0 right-[4%] -mt-6 mb-3 hidden lg:flex"}>
       {scrollSnaps.map((_, index) => (
         <li
-          key={index}
+          key={`scroll-snap-${index}`}
           className={cn(
             "ms-[1px] h-0.5 w-3",
             index === selectedIndex ? "bg-[#aaa]" : "bg-[#4d4d4d]",
@@ -97,42 +117,53 @@ const CarouselIndex = () => {
 };
 
 type CarouselButtonProps = {
-  type: "prev" | "next";
-};
+  Icon: IconType;
+  className?: string;
+} & ButtonHTMLAttributes<HTMLButtonElement>;
 
-const CarouselButton = ({ type }: CarouselButtonProps) => {
-  const { emblaApi, isPrevButtonDisabled, setIsPrevButtonDisabled } = useCarouselContext();
-
-  const isPrev = type === "prev";
-
-  const handleClick = () => {
-    if (!emblaApi) return;
-    if (isPrev) {
-      emblaApi.scrollPrev();
-    } else {
-      emblaApi.scrollNext();
-      setIsPrevButtonDisabled(false);
-    }
-  };
-
+const CarouselButton = ({ Icon, className, ...props }: CarouselButtonProps) => {
   return (
     <button
-      onClick={handleClick}
-      aria-label={isPrev ? "Previous slide" : "Next slide"}
-      disabled={isPrevButtonDisabled && isPrev}
       className={cn(
         "group/carousel-button absolute top-0 z-20 hidden h-full w-[4%] cursor-pointer items-center justify-center bg-[hsla(0,0%,8%,0.5)] text-[3vw] transition hover:bg-[hsla(0,0%,8%,0.7)] disabled:hidden lg:flex",
-        isPrev ? "left-0" : "right-0",
+        className,
       )}
+      {...props}
     >
-      <CgChevronRight
+      <Icon
         className={cn(
           "origin-center transform opacity-0 transition-transform group-hover/carousel:opacity-100 group-hover/carousel-button:scale-125 group-focus/carousel-button:opacity-100",
-          isPrev && "rotate-180",
         )}
       />
     </button>
   );
 };
 
-export { Carousel, CarouselContainer, CarouselIndex, CarouselButton };
+const CarouselPrevButton = () => {
+  const { isPrevButtonDisabled, handleScrollPrev } = useCarouselContext();
+
+  return (
+    <CarouselButton
+      Icon={CgChevronLeft}
+      className={"left-0"}
+      disabled={isPrevButtonDisabled}
+      onClick={handleScrollPrev}
+      aria-label={"Previous slide"}
+    />
+  );
+};
+
+const CarouselNextButton = () => {
+  const { handleScrollNext } = useCarouselContext();
+
+  return (
+    <CarouselButton
+      Icon={CgChevronRight}
+      className={"right-0"}
+      onClick={handleScrollNext}
+      aria-label={"Next slide"}
+    />
+  );
+};
+
+export { Carousel, CarouselContainer, CarouselIndex, CarouselNextButton, CarouselPrevButton };

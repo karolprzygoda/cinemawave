@@ -54,7 +54,7 @@
     --animate-slide-in-rtl: slide-in-rtl;
     --animate-slide-out-rtl: slide-out-rtl;
     --animate-hover-card-open: hover-card-open;
-    --animate-hover-card-close: hover-card-close;
+    --animate-hover-card-close: hover-card-close ;
 
     @keyframes fade-in {
         0% {
@@ -111,25 +111,24 @@
     }
 
     @keyframes hover-card-open {
-        0% {
+        from {
             opacity: 0;
-            scale: 50%;
+            transform: scale(0.5);
         }
-        100% {
+        to {
             opacity: 1;
-            scale: 100%;
+            transform: scale(1);
         }
     }
 
     @keyframes hover-card-close {
-        0% {
+        from {
             opacity: 1;
-            scale: 100%;
-
+            transform: scale(1);
         }
-        100% {
+        to {
             opacity: 0;
-            scale: 50%;
+            transform: scale(0.5);
         }
     }
 

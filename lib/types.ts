@@ -1,4 +1,4 @@
-export interface MovieListItem {
+export type TMDBMovieListItemResponse = {
   id: number;
   title: string;
   original_title: string;
@@ -13,9 +13,9 @@ export interface MovieListItem {
   genre_ids: number[];
   adult: boolean;
   video: boolean;
-}
+};
 
-export interface MovieDetail {
+export type TMDBMovieDetailResponse = {
   id: number;
   title: string;
   original_title: string;
@@ -35,13 +35,13 @@ export interface MovieDetail {
   budget: number;
   revenue: number;
   homepage: string | null;
-  genres: Genre[];
-  production_companies: ProductionCompany[];
-  production_countries: Country[];
-  spoken_languages: SpokenLanguage[];
-}
+  genres: TMDBGenreResponse[];
+  production_companies: TMDBProductionCompany[];
+  production_countries: TMDBCountry[];
+  spoken_languages: TMDBSpokenLanguage[];
+};
 
-export interface TVShowListItem {
+export type TMDBTVShowListItemResponse = {
   id: number;
   name: string;
   original_name: string;
@@ -55,34 +55,49 @@ export interface TVShowListItem {
   vote_count: number;
   genre_ids: number[];
   origin_country: string[];
-}
+};
 
-export interface PaginatedResponse<T> {
+export type TMDBPaginatedResponse<T> = {
   page: number;
   results: T[];
   total_results: number;
   total_pages: number;
-}
+};
 
-export interface Genre {
+export type TMDBGenreResponse = {
   id: number;
   name: string;
-}
+};
 
-export interface ProductionCompany {
+export type TMDBProductionCompany = {
   id: number;
   name: string;
   logo_path: string | null;
   origin_country: string;
-}
+};
 
-export interface Country {
+export type TMDBCountry = {
   iso_3166_1: string;
   name: string;
-}
+};
 
-export interface SpokenLanguage {
+export type TMDBSpokenLanguage = {
   english_name: string;
   iso_639_1: string;
   name: string;
-}
+};
+
+export type TMDBMovieLogo = {
+  aspect_ratio: number;
+  file_path: string;
+  height: number;
+  iso_639_1: string;
+  vote_average: number;
+  vote_count: number;
+  width: number;
+};
+
+export type TMDBMovie = TMDBMovieListItemResponse & {
+  genres: TMDBGenreResponse[];
+  logo: TMDBMovieLogo;
+};

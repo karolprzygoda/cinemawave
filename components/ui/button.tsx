@@ -15,7 +15,7 @@ const buttonVariants = cva(
           "border border-border bg-transparent text-secondary hover:bg-foreground hover:text-foreground",
         fab: "rounded-full! bg-accent text-accent-foreground hover:bg-accent/80",
         fabOutline:
-          "rounded-full! bg-transparent border-2 border-border text-secondary  hover:text-foreground",
+          "rounded-full! bg-transparent border-2 border-border text-secondary hover:text-foreground hover:border-foreground",
         link: "hover:underline text-foreground",
         linkStatic: "underline",
         linkGlow: "hover:text-accent",

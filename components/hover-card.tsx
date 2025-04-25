@@ -18,30 +18,32 @@ import { useHydration } from "@/hooks/use-hydration";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { TMDBMovie } from "@/lib/types";
 import useTimeout from "@/hooks/use-timeout";
 import useUnmountAnimation from "@/hooks/use-unmount-animation";
 import useKeyPress from "@/hooks/use-key-press";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { useTMDBGenres } from "@/components/tmdb-genres-provider";
+import { TMDBMediaItemMap, TMDBMediaListResult } from "@/lib/tmdb-types";
 
-const ANIMATION_DURATION = 300;
+const ANIMATION_DURATION = 200;
 const OPEN_TIMEOUT = 500;
 const CLOSE_TIMEOUT = 200;
 
-type HoverCardContextProps = {
+type HoverCardContextProps<T extends keyof TMDBMediaItemMap> = {
   isOpen: boolean;
   isMounted: boolean;
   isUnmounting: boolean;
   triggerRect: DOMRect | null;
-  movieData: TMDBMovie;
+  mediaData: TMDBMediaListResult<T>;
   setTriggerRect: Dispatch<SetStateAction<DOMRect | null>>;
   handleOpen: () => void;
   handleClose: () => void;
   handleDebouncedOpen: (e: React.MouseEvent) => void;
   handleDebouncedClose: () => void;
+  opacityAnimation: boolean;
 };
 
-const HoverCardContext = createContext<HoverCardContextProps | null>(null);
+const HoverCardContext = createContext<HoverCardContextProps<"tv" | "movie"> | null>(null);
 
 const useHoverCardContext = () => {
   const context = useContext(HoverCardContext);
@@ -51,12 +53,18 @@ const useHoverCardContext = () => {
   return context;
 };
 
-type HoverCardProps = {
+type HoverCardProps<T extends keyof TMDBMediaItemMap> = {
   children: ReactNode;
-  movieData: TMDBMovie;
+  mediaData: TMDBMediaListResult<T>;
+  opacityAnimation?: boolean;
 };
 
-const HoverCard = ({ children, movieData }: HoverCardProps) => {
+const HoverCard = <T extends keyof TMDBMediaItemMap>({
+  children,
+
+  mediaData,
+  opacityAnimation = false,
+}: HoverCardProps<T>) => {
   const [isOpen, setIsOpen] = useState(false);
   const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null);
   const { isMounted, isUnmounting } = useUnmountAnimation(isOpen, ANIMATION_DURATION);
@@ -82,12 +90,14 @@ const HoverCard = ({ children, movieData }: HoverCardProps) => {
   };
 
   const handleDebouncedOpen = (e: React.MouseEvent) => {
-    clearTimeouts();
-    const target = e.currentTarget;
-    openTimeout.set(() => {
-      setIsOpen(true);
-      setTriggerRect(target.getBoundingClientRect());
-    }, OPEN_TIMEOUT);
+    if (isDesktop) {
+      clearTimeouts();
+      const target = e.currentTarget;
+      openTimeout.set(() => {
+        setIsOpen(true);
+        setTriggerRect(target.getBoundingClientRect());
+      }, OPEN_TIMEOUT);
+    }
   };
 
   const handleDebouncedClose = () => {
@@ -104,12 +114,13 @@ const HoverCard = ({ children, movieData }: HoverCardProps) => {
         isMounted,
         isUnmounting,
         triggerRect,
-        movieData,
+        mediaData,
         setTriggerRect,
         handleOpen,
         handleClose,
         handleDebouncedOpen,
         handleDebouncedClose,
+        opacityAnimation,
       }}
     >
       {children}
@@ -119,30 +130,127 @@ const HoverCard = ({ children, movieData }: HoverCardProps) => {
 };
 
 const HoverCardContent = () => {
-  const { triggerRect, isMounted, isUnmounting, movieData, handleOpen, handleClose } =
-    useHoverCardContext();
+  const {
+    triggerRect,
+    isMounted,
+    isUnmounting,
+    mediaData,
+    handleOpen,
+    handleClose,
+    opacityAnimation,
+  } = useHoverCardContext();
 
   const hoverCardRef = useRef<HTMLDivElement | null>(null);
 
   useLayoutEffect(() => {
     if (!triggerRect || !hoverCardRef.current) return;
 
-    const viewportWidth = window.innerWidth;
-    const edgeOffset = viewportWidth * 0.04;
+    const hoverCard = hoverCardRef.current;
+    const vw = window.innerWidth;
+    const edgeOffset = vw * 0.04;
+    const paddingX = vw * 0.002; // 0.2vw trigger padding
+
+    const triggerLeft = Math.round(triggerRect.left);
+    const triggerTop = Math.round(triggerRect.top + window.scrollY);
+
+    // hover-card width and height
+    const cardW = hoverCard.offsetWidth;
+    const cardH = hoverCard.offsetHeight;
+
+    // trigger content width
+    const contentW = triggerRect.width - 2 * paddingX;
+
+    const scaleX = contentW / cardW;
+    const scaleY = triggerRect.width / cardW;
+
+    const initialLeft = triggerLeft + paddingX;
+
     const centerX = triggerRect.left + triggerRect.width / 2;
+    const baseDeltaX = Math.round(centerX - cardW / 2 - initialLeft);
+    const offsetY = Math.round(triggerRect.height / 2 - cardH / 2);
 
-    const cardHeight = hoverCardRef.current.offsetHeight;
-    const cardWidth = hoverCardRef.current.offsetWidth;
+    const isLeftEdge = triggerRect.left <= edgeOffset + 1;
+    const isRightEdge = triggerRect.left + triggerRect.width >= vw - 2 * edgeOffset - 1;
 
-    const left = Math.min(
-      Math.max(centerX - cardWidth / 2, edgeOffset),
-      viewportWidth - cardWidth - edgeOffset,
-    );
-    const top = triggerRect.top + window.scrollY + triggerRect.height / 2 - cardHeight / 2;
+    const finalDeltaX = baseDeltaX + (isLeftEdge ? edgeOffset : isRightEdge ? -edgeOffset : 0);
 
-    hoverCardRef.current.style.left = `${Math.round(left)}px`;
-    hoverCardRef.current.style.top = `${Math.round(top)}px`;
+    hoverCard.style.setProperty("--hover-scale-x", String(scaleX));
+    hoverCard.style.setProperty("--hover-scale-y", String(scaleY));
+    hoverCard.style.setProperty("--hover-translate-x", `${finalDeltaX}px`);
+    hoverCard.style.setProperty("--hover-offset", `${offsetY}px`);
+
+    hoverCard.style.left = `${initialLeft}px`;
+    hoverCard.style.top = `${triggerTop}px`;
+    hoverCard.style.transformOrigin = "left top";
   }, [isMounted, triggerRect]);
+
+  useLayoutEffect(() => {
+    const el = hoverCardRef.current;
+    if (!el) return;
+
+    if (isMounted && !isUnmounting) {
+      el.animate(
+        [
+          {
+            transform:
+              "translateX(0) translateY(0) scale(var(--hover-scale-x), var(--hover-scale-y))",
+            boxShadow: "none",
+            backgroundColor: "transparent",
+            opacity: opacityAnimation ? 0 : 1,
+          },
+          {
+            backgroundColor: "var(--background)",
+            offset: 0.1,
+          },
+          {
+            transform:
+              "translateX(var(--hover-translate-x)) translateY(var(--hover-offset)) scale(1)",
+            boxShadow: "0 3px 10px rgba(0, 0, 0, 0.75)",
+            backgroundColor: "var(--background)",
+            opacity: 1,
+          },
+        ],
+        {
+          duration: ANIMATION_DURATION,
+          easing: "ease-out",
+          fill: "forwards",
+        },
+      );
+    }
+
+    if (isUnmounting) {
+      el.animate(
+        [
+          {
+            transform:
+              "translateX(var(--hover-translate-x)) translateY(var(--hover-offset)) scale(1)",
+            boxShadow: "0 3px 10px rgba(0, 0, 0, 0.75)",
+            backgroundColor: "var(--background)",
+          },
+          {
+            backgroundColor: "var(--background)",
+            offset: 0.5,
+          },
+          {
+            transform:
+              "translateX(0) translateY(0) scale(var(--hover-scale-x), var(--hover-scale-y))",
+            boxShadow: "none",
+            backgroundColor: "transparent",
+            opacity: opacityAnimation ? 0 : 1,
+          },
+        ],
+        {
+          duration: ANIMATION_DURATION,
+          easing: "ease-out",
+          fill: "forwards",
+        },
+      );
+    }
+  }, [isMounted, isUnmounting, opacityAnimation]);
+
+  const { genresMap } = useTMDBGenres();
+
+  const displayTitle = "title" in mediaData ? mediaData.title : mediaData.name;
 
   return (
     <HoverCardPortal>
@@ -152,36 +260,43 @@ const HoverCardContent = () => {
           onMouseEnter={handleOpen}
           onMouseLeave={handleClose}
           className={cn(
-            `bg-background absolute z-50 w-[23.3vw] min-w-[330px] origin-center rounded-md shadow-[0px_3px_10px_rgba(0,0,0,0.75)]`,
-            isUnmounting
-              ? "animate-hover-card-close pointer-events-none"
-              : "animate-hover-card-open pointer-events-auto",
+            `bg-background absolute z-50 w-[23.3vw] min-w-[330px] rounded-md will-change-transform`,
           )}
-          style={{
-            animationDuration: `${ANIMATION_DURATION}ms`,
-            animationFillMode: "forwards", //fixes flickering on close in firefox
-          }}
         >
           <div className="relative aspect-video">
             <Image
-              src={`https://image.tmdb.org/t/p/original/${movieData.backdrop_path}`}
+              src={`https://image.tmdb.org/t/p/original/${mediaData.backdrop_path}`}
               alt="movie"
               className="rounded-t-md object-cover"
               fill
             />
-            <div className="absolute bottom-4 left-4 w-3/5 max-w-[150px]">
-              <Image
-                src={`https://image.tmdb.org/t/p/original/${movieData.logo.file_path}`}
-                alt="movie logo"
-                className="object-contain"
-                width={0}
-                height={0}
-                sizes="100vw"
-                style={{ width: "100%", height: "auto" }}
-              />
+            <div className="absolute bottom-[8%] left-[8%] w-1/3">
+              {mediaData.logo ? (
+                <Image
+                  src={`https://image.tmdb.org/t/p/original/${mediaData.logo.file_path}`}
+                  alt="movie logo"
+                  className="object-contain"
+                  width={0}
+                  height={0}
+                  sizes="100vw"
+                  style={{ width: "100%", height: "auto" }}
+                />
+              ) : (
+                <span className={"font-semibold"}>{displayTitle}</span>
+              )}
             </div>
           </div>
-          <div className={"flex flex-col p-4"}>
+          <div
+            className={cn(
+              "flex flex-col p-4",
+              isUnmounting ? "animate-fade-out" : "animate-fade-in",
+            )}
+            style={{
+              willChange: "opacity",
+              animationDuration: `${ANIMATION_DURATION}ms`,
+              animationFillMode: "forwards",
+            }}
+          >
             <div className={"mb-2 flex gap-3"}>
               <PlayButton />
               <AddToWatchButton />
@@ -199,8 +314,8 @@ const HoverCardContent = () => {
               </div>
             </div>
             <div className={"mb-2 flex flex-wrap items-center gap-3"}>
-              {movieData.genres.map((genre) => (
-                <div key={genre.id}>{genre.name}</div>
+              {mediaData.genre_ids.map((genreId) => (
+                <div key={genreId}>{genresMap.get(genreId)}</div>
               ))}
             </div>
           </div>
@@ -216,7 +331,7 @@ type HoverCardTriggerProps = {
 };
 
 const HoverCardTrigger = ({ children, className }: HoverCardTriggerProps) => {
-  const { isOpen, movieData, setTriggerRect, handleDebouncedOpen, handleDebouncedClose } =
+  const { isOpen, mediaData, setTriggerRect, handleDebouncedOpen, handleDebouncedClose } =
     useHoverCardContext();
   const hoverCardTriggerRef = useRef<HTMLAnchorElement | null>(null);
 
@@ -237,23 +352,28 @@ const HoverCardTrigger = ({ children, className }: HoverCardTriggerProps) => {
 
   return (
     <Link
-      ref={hoverCardTriggerRef}
-      href={`/watch/${movieData.id}`}
-      className={className}
+      href={`/watch/${mediaData.id}`}
       onMouseEnter={handleDebouncedOpen}
       onMouseLeave={handleDebouncedClose}
+      ref={hoverCardTriggerRef}
+      className={cn(
+        "group/hover-card-trigger relative flex h-full w-1/2 shrink-0 px-[0.2vw] focus:outline-none sm:w-1/3 md:w-1/4 lg:w-1/5 xl:w-1/6",
+        className,
+      )}
     >
-      {children}
+      <div className="before:rounded-radius relative h-full w-full before:pointer-events-none before:absolute before:inset-0 before:z-20 before:border-[2px] before:border-neutral-300 before:opacity-0 before:content-[''] group-focus/hover-card-trigger:before:opacity-100">
+        {children}
+      </div>
     </Link>
   );
 };
 
 const PlayButton = () => {
-  const { movieData } = useHoverCardContext();
+  const { mediaData } = useHoverCardContext();
 
   return (
     <Link
-      href={`/play/${movieData.id}`}
+      href={`/play/${mediaData.id}`}
       className={buttonVariants({ variant: "fab", size: "fab" })}
     >
       <FaPlay />
@@ -262,11 +382,11 @@ const PlayButton = () => {
 };
 
 const MoreInfoButton = () => {
-  const { movieData } = useHoverCardContext();
+  const { mediaData } = useHoverCardContext();
 
   return (
     <Link
-      href={`/info/${movieData.id}`}
+      href={`/info/${mediaData.id}`}
       className={cn(buttonVariants({ variant: "fabOutline", size: "fab" }), "ms-auto")}
     >
       <FaChevronDown />
@@ -275,7 +395,7 @@ const MoreInfoButton = () => {
 };
 
 const AddToWatchButton = () => {
-  const { movieData } = useHoverCardContext();
+  const { mediaData } = useHoverCardContext();
 
   return (
     <Button variant={"fabOutline"} size={"fab"}>

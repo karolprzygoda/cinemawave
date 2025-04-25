@@ -1,36 +1,41 @@
 import Billboard from "@/components/billboard";
 import prismadb from "@/lib/prismadb";
 import TopTenSection from "@/components/top-ten-section";
-import { fetchTMDBMovieGenres, fetchTMDBPopularMovies } from "@/actions/movies-actions";
+import { TMDBGenresProvider } from "@/components/tmdb-genres-provider";
+import { fetchTMDBGenres, fetchTMDBMediaList } from "@/actions/tmdb-actions";
+import { getRandomArrayElement } from "@/lib/utils";
+import MediaListSection from "@/components/media-list-section";
 
 const Page = async () => {
-  const [movies, tmdbMovies, tmdbMoviesGenres] = await Promise.all([
+  const [
+    movies,
+    tmdbGenres,
+    tmdbPopularMovies,
+    tmdbPopularSeries,
+    tmdbTopRatedMovies,
+    tmdbTopRatedSeries,
+  ] = await Promise.all([
     prismadb.movies.findMany(),
-    fetchTMDBPopularMovies(),
-    fetchTMDBMovieGenres(),
+    fetchTMDBGenres(),
+    fetchTMDBMediaList("movie", "popular"),
+    fetchTMDBMediaList("tv", "popular"),
+    fetchTMDBMediaList("movie", "top_rated"),
+    fetchTMDBMediaList("tv", "top_rated"),
   ]);
 
-  const tmdbMoviesWithGenres = tmdbMovies.map((movie) => {
-    return {
-      ...movie,
-      genres: movie.genre_ids.map((id) => {
-        return tmdbMoviesGenres.find((genre) => genre.id === id)!;
-      }),
-    };
-  });
-
-  const randomIndex = Math.floor(Math.random() * movies.length);
-
-  const randomMovie = movies[randomIndex];
+  const randomMovie = getRandomArrayElement(movies);
 
   return (
-    <>
+    <TMDBGenresProvider genres={tmdbGenres}>
       <Billboard movie={randomMovie} />
-      <TopTenSection movies={tmdbMoviesWithGenres} />
-      <TopTenSection movies={tmdbMoviesWithGenres} />
-      <TopTenSection movies={tmdbMoviesWithGenres} />
-      <TopTenSection movies={tmdbMoviesWithGenres} />
-    </>
+      <TopTenSection sectionTitle="Top 10 Trending Movies" media={tmdbPopularMovies} />
+      <MediaListSection sectionTitle="Top 10 Trending Movies" media={tmdbPopularMovies} />
+      <MediaListSection sectionTitle="Top 10 Trending TV Shows" media={tmdbPopularSeries} />
+      <MediaListSection sectionTitle="10 Top Rated Movies" media={tmdbTopRatedMovies} />
+      <TopTenSection sectionTitle="Top 10 Trending TV Shows" media={tmdbPopularSeries} />
+      <TopTenSection sectionTitle="10 Top Rated Movies" media={tmdbTopRatedMovies} />
+      <TopTenSection sectionTitle="10 Top Rated TV Shows" media={tmdbTopRatedSeries} />
+    </TMDBGenresProvider>
   );
 };
 

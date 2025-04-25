@@ -5,7 +5,7 @@ import AccountMenu from "@/components/account-menu";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
-import useScroll from "@/hooks/use-scroll";
+import { useScrolled } from "@/hooks/use-scrolled";
 
 export const NAVBAR_LINKS = [
   { href: "#", label: "Home page" },
@@ -16,13 +16,13 @@ export const NAVBAR_LINKS = [
 ];
 
 const Header = () => {
-  const { y } = useScroll();
+  const scrolled = useScrolled();
 
   return (
     <header
       className={cn(
         "sticky top-0 z-[999] flex h-18 w-full items-center justify-between px-4 py-6 duration-400 before:absolute before:inset-0 before:z-[-1] before:bg-gradient-to-b before:from-[rgba(0,0,0,0.7)] before:from-10% before:to-transparent before:transition-opacity before:duration-400 before:content-[''] md:px-16",
-        y > 20 ? "bg-background before:opacity-0" : "before:opacity-100",
+        scrolled ? "bg-background before:opacity-0" : "before:opacity-100",
       )}
     >
       <div className={"flex items-center gap-8"}>

@@ -14,3 +14,8 @@ export function debounce<T extends (...args: unknown[]) => void>(func: T, delay:
   debounced.cancel = () => clearTimeout(timeout);
   return debounced as T & { cancel: () => void };
 }
+
+export function getRandomArrayElement<T>(arr: T[]): T {
+  const randomIndex = Math.floor(Math.random() * arr.length);
+  return arr[randomIndex];
+}

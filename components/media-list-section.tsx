@@ -1,5 +1,3 @@
-import { Numbers } from "@/components/numbers";
-import Image from "next/image";
 import {
   Carousel,
   CarouselContainer,
@@ -7,17 +5,19 @@ import {
   CarouselNextButton,
   CarouselPrevButton,
 } from "@/components/ui/carousel";
-import { HoverCard, HoverCardTrigger } from "@/components/hover-card";
 import { TMDBMediaItemMap, TMDBMediaListResult } from "@/lib/tmdb-types";
+import { HoverCard, HoverCardTrigger } from "@/components/hover-card";
+import Image from "next/image";
+import React from "react";
 
 type TopTenSectionProps<T extends keyof TMDBMediaItemMap> = {
-  media: TMDBMediaListResult<T>[];
   sectionTitle: string;
+  media: TMDBMediaListResult<T>[];
 };
 
-const TopTenSection = <T extends keyof TMDBMediaItemMap>({
-  media,
+const MediaListSection = <T extends keyof TMDBMediaItemMap>({
   sectionTitle,
+  media,
 }: TopTenSectionProps<T>) => {
   return (
     <section className={"my-[3vw] flex flex-col"}>
@@ -44,9 +44,9 @@ const TopTenSection = <T extends keyof TMDBMediaItemMap>({
           },
         }}
       >
-        <CarouselContainer className={"mx-[4%] pb-[14%] md:pb-[5%] lg:pb-0"}>
-          {media.slice(0, 10).map((item, index) => (
-            <TopTenSectionItem key={item.id} index={index} mediaData={item} />
+        <CarouselContainer className={"mx-[4%]"}>
+          {media.map((item) => (
+            <SectionItem key={item.id} mediaData={item} />
           ))}
         </CarouselContainer>
         <CarouselIndex />
@@ -56,34 +56,40 @@ const TopTenSection = <T extends keyof TMDBMediaItemMap>({
     </section>
   );
 };
-
-type TopTenSectionItem<T extends keyof TMDBMediaItemMap> = {
-  index: number;
+type SectionItemProps<T extends keyof TMDBMediaItemMap> = {
   mediaData: TMDBMediaListResult<T>;
 };
 
-const TopTenSectionItem = <T extends keyof TMDBMediaItemMap>({
-  index,
-  mediaData,
-}: TopTenSectionItem<T>) => {
-  const NumberSVG = Numbers[index];
-
+const SectionItem = <T extends keyof TMDBMediaItemMap>({ mediaData }: SectionItemProps<T>) => {
   const displayTitle = "title" in mediaData ? mediaData.title : mediaData.name;
 
   return (
-    <HoverCard opacityAnimation mediaData={mediaData}>
-      <HoverCardTrigger className="aspect-[10/7]">
-        <NumberSVG className="absolute -bottom-5 left-0 z-0 h-2/3 w-1/2 lg:right-auto lg:bottom-0 lg:h-full lg:w-1/2" />
+    <HoverCard mediaData={mediaData}>
+      <HoverCardTrigger className="aspect-video">
         <Image
-          width={500}
-          height={750}
-          className="rounded-r-radius absolute right-0 z-0 w-3/5 lg:h-full lg:w-1/2"
-          src={`https://image.tmdb.org/t/p/w500${mediaData.poster_path}`}
+          fill
+          className="rounded-radius"
+          src={`https://image.tmdb.org/t/p/w500${mediaData.backdrop_path}`}
           alt={`${displayTitle} poster`}
         />
+        <div className="absolute bottom-[8%] left-[8%] w-1/3">
+          {mediaData.logo ? (
+            <Image
+              src={`https://image.tmdb.org/t/p/original/${mediaData.logo.file_path}`}
+              alt="movie logo"
+              className="object-contain"
+              width={0}
+              height={0}
+              sizes="100vw"
+              style={{ width: "100%", height: "auto" }}
+            />
+          ) : (
+            <span className={"font-semibold"}>{displayTitle}</span>
+          )}
+        </div>
       </HoverCardTrigger>
     </HoverCard>
   );
 };
 
-export default TopTenSection;
+export default MediaListSection;

@@ -21,6 +21,12 @@
     --border: oklch(0.6 0 0);
     --border-muted: oklch(0.26 0 0);
     --ring: oklch(1 0 0);
+
+    /*DEFAULT VALUES DEFINED ONLY FOR INTERPRETER PURPOSES*/
+    --hover-scale-x: 65;
+    --hover-scale-y: 65;
+    --hover-translate-x: 0px;
+    --hover-offset: 0px;
 }
 
 @theme inline {
@@ -111,26 +117,38 @@
     }
 
     @keyframes hover-card-open {
-        from {
-            opacity: 0;
-            transform: scale(0.5);
+        0% {
+            transform: translateX(0) translateY(0) scale(var(--hover-scale-x), var(--hover-scale-y));
+            box-shadow: none;
+            animation-timing-function: ease-out;
+            background-color: transparent;
         }
-        to {
-            opacity: 1;
-            transform: scale(1);
+        10% {
+            background-color: var(--background);
+        }
+        100% {
+            transform: translateX(var(--hover-translate-x)) translateY(var(--hover-offset)) scale(1);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.75);
         }
     }
 
     @keyframes hover-card-close {
-        from {
-            opacity: 1;
-            transform: scale(1);
+        0% {
+            transform: translateX(var(--hover-translate-x)) translateY(var(--hover-offset)) scale(1);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.75);
+            animation-timing-function: ease-out;
+            background-color: var(--background);
         }
-        to {
-            opacity: 0;
-            transform: scale(0.5);
+        50% {
+            background-color: var(--background);
+        }
+        100% {
+            transform: translateX(0) translateY(0) scale(var(--hover-scale-x), var(--hover-scale-y));
+            box-shadow: none;
+            background-color: transparent;
         }
     }
+
 
 }
 

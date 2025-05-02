@@ -1,14 +1,17 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { FaPlay } from "react-icons/fa";
 import { LuInfo } from "react-icons/lu";
-import { movies } from "@prisma/client";
 import { useEffect, useRef, useState } from "react";
 import { GoMute, GoUnmute } from "react-icons/go";
+import PlayButton from "@/components/play-button";
+import { cn } from "@/lib/utils";
+import MediaDetailsButton from "@/components/media-details-button";
+import { MediaListItem } from "@/lib/types";
 
 type BillboardProps = {
-  movie: movies;
+  movie: MediaListItem;
 };
 
 const Billboard = ({ movie }: BillboardProps) => {
@@ -44,10 +47,11 @@ const Billboard = ({ movie }: BillboardProps) => {
         <video
           ref={videoRef}
           className={"h-full w-full object-cover"}
+          disablePictureInPicture
           autoPlay
           muted={muted}
           loop
-          poster={movie.thumbnail_url}
+          poster={movie.backdrop_url}
         >
           <source src={movie.video_url} type="video/mp4" />
         </video>
@@ -63,24 +67,26 @@ const Billboard = ({ movie }: BillboardProps) => {
           {movie.description}
         </div>
         <div className={"flex items-center gap-4"}>
-          <Button
-            variant={"accent"}
-            className={
-              "h-11 px-8 text-xl xl:h-auto xl:py-3 xl:text-2xl xl:font-bold xl:[&_svg]:size-7"
-            }
+          <PlayButton
+            mediaId={movie.id}
+            className={cn(
+              buttonVariants({ variant: "accent" }),
+              "h-11 px-8 text-xl xl:h-auto xl:py-3 xl:text-2xl xl:font-bold xl:[&_svg]:size-7",
+            )}
           >
             <FaPlay />
             Play
-          </Button>
-          <Button
-            variant={"secondary"}
-            className={
-              "h-11 px-8 text-xl xl:h-auto xl:py-3 xl:text-2xl xl:font-bold xl:[&_svg]:size-7"
-            }
+          </PlayButton>
+          <MediaDetailsButton
+            mediaId={movie.id}
+            className={cn(
+              buttonVariants({ variant: "secondary" }),
+              "h-11 px-8 text-xl xl:h-auto xl:py-3 xl:text-2xl xl:font-bold xl:[&_svg]:size-7",
+            )}
           >
             <LuInfo />
             More Info
-          </Button>
+          </MediaDetailsButton>
         </div>
       </div>
       <Button

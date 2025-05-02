@@ -69,8 +69,6 @@ export type TMDBMediaItemMap = {
   tv: TMDBTVSeriesListItem;
 };
 
-export type TMDBMediaListResult<T extends keyof TMDBMediaItemMap> = TMDBMediaItemMap[T] & {
-  logo: TMDBImageType | null;
-};
+export type TMDBMediaListItem<T extends keyof TMDBMediaItemMap> = TMDBMediaItemMap[T];
 
-export type mediaCategory = "popular" | "top_rated";
+export type TMDBMediaCategory = "popular" | "top_rated";

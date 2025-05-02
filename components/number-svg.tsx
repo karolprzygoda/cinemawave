@@ -1,8 +1,8 @@
-import { HTMLAttributes } from "react";
+import React, { HTMLAttributes } from "react";
 
 type IconProps = HTMLAttributes<SVGElement>;
 
-export const Numbers = [
+const Numbers = [
   (props: IconProps) => (
     <svg id="rank-1" width="100%" height="100%" viewBox="-20 0 70 154" {...props}>
       <path
@@ -94,3 +94,20 @@ export const Numbers = [
     </svg>
   ),
 ];
+
+type NumberSVGProps = {
+  index: number;
+  className?: string;
+};
+
+const NumberSVG = ({ index, className }: NumberSVGProps) => {
+  const Number = Numbers[index];
+
+  if (!Number) {
+    return null;
+  }
+
+  return <Number className={className} />;
+};
+
+export default NumberSVG;

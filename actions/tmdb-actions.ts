@@ -1,16 +1,18 @@
 "use server";
 
 import {
-  TMDBGenresResponse,
+  TMDBMediaCategory,
   TMDBGenre,
-  TMDBPaginatedResponse,
-  TMDBMediaListResult,
+  TMDBGenresResponse,
   TMDBImagesResponse,
   TMDBMediaItemMap,
-  mediaCategory,
+  TMDBMediaListItem,
+  TMDBPaginatedResponse,
 } from "@/lib/tmdb-types";
+import { MediaListItem } from "@/lib/types";
 
 const BASE_URL = "https://api.themoviedb.org/3";
+const BASE_IMAGE_URL = "https://image.tmdb.org/t/p/original";
 
 export async function fetchTMDBGenres(): Promise<TMDBGenre[]> {
   const urls = [
@@ -18,7 +20,7 @@ export async function fetchTMDBGenres(): Promise<TMDBGenre[]> {
     `${BASE_URL}/genre/tv/list?language=en-US&api_key=${process.env.TMDB_API_KEY}`,
   ];
 
-  const responses = await Promise.all(urls.map((url) => fetch(url)));
+  const responses = await Promise.all(urls.map((url) => fetch(url, { cache: "force-cache" })));
 
   const errors = responses.filter((response) => !response.ok);
 
@@ -36,9 +38,9 @@ export async function fetchTMDBGenres(): Promise<TMDBGenre[]> {
 
 export async function fetchTMDBMediaList<T extends keyof TMDBMediaItemMap>(
   mediaType: T,
-  category: mediaCategory,
+  category: TMDBMediaCategory,
   pages: number = 1,
-): Promise<TMDBMediaListResult<T>[]> {
+): Promise<TMDBMediaListItem<T>[]> {
   const urls = Array.from({ length: pages }, (_, i) => {
     const page = i + 1;
     return `${BASE_URL}/${mediaType}/${category}?language=en-US&page=${page}&api_key=${process.env.TMDB_API_KEY}`;
@@ -53,20 +55,11 @@ export async function fetchTMDBMediaList<T extends keyof TMDBMediaItemMap>(
     throw new Error("Failed to fetch popular movies or TV series");
   }
 
-  const data: TMDBPaginatedResponse<TMDBMediaListResult<T>>[] = await Promise.all(
-    responses.map((response) => response.json()),
+  const pagesData: TMDBPaginatedResponse<TMDBMediaListItem<T>>[] = await Promise.all(
+    responses.map((r) => r.json()),
   );
 
-  return Promise.all(
-    data
-      .flatMap((item) => item.results)
-      .map(async (media) => ({
-        ...media,
-        logo: await fetchTMDBImages(mediaType, media.id).then(
-          (res) => res.logos.find((logo) => logo.iso_639_1 === "en") || res.logos[0] || null,
-        ),
-      })),
-  );
+  return pagesData.flatMap((page) => page.results);
 }
 
 export async function fetchTMDBImages(
@@ -83,4 +76,44 @@ export async function fetchTMDBImages(
   }
 
   return response.json();
+}
+
+export async function adaptTMDBMediaListItem<T extends keyof TMDBMediaItemMap>(
+  mediaType: T,
+  mediaData: TMDBMediaListItem<T>,
+): Promise<MediaListItem> {
+  const displayTitle = "title" in mediaData ? mediaData.title : mediaData.name;
+
+  const [mediaImages, genres] = await Promise.all([
+    fetchTMDBImages(mediaType, mediaData.id),
+    fetchTMDBGenres(),
+  ]);
+
+  const logo =
+    mediaImages.logos.find((logo) => logo.iso_639_1 === "en") || mediaImages.logos[0] || null;
+
+  const genresMap = new Map(genres.map((genre) => [genre.id, genre.name]));
+
+  return {
+    id: mediaData.id,
+    title: displayTitle,
+    backdrop_url: BASE_IMAGE_URL + mediaData.backdrop_path,
+    description: mediaData.overview,
+    genres: mediaData.genre_ids.map((id: number) => ({
+      id,
+      name: genresMap.get(id)!,
+    })),
+    poster_url: BASE_IMAGE_URL + mediaData.poster_path,
+    logo_url: BASE_IMAGE_URL + logo?.file_path,
+  };
+}
+
+export async function getTMDBSectionList<T extends keyof TMDBMediaItemMap>(
+  mediaType: T,
+  category: TMDBMediaCategory,
+  pages: number = 1,
+): Promise<MediaListItem[]> {
+  const data = await fetchTMDBMediaList(mediaType, category, pages);
+
+  return Promise.all(data.map((mediaData) => adaptTMDBMediaListItem(mediaType, mediaData)));
 }

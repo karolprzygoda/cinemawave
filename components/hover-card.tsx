@@ -1,8 +1,7 @@
 "use client";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { FaChevronDown, FaPlay, FaPlus } from "react-icons/fa";
-import Image from "next/image";
 import React, {
   createContext,
   Dispatch,
@@ -22,19 +21,22 @@ import useTimeout from "@/hooks/use-timeout";
 import useUnmountAnimation from "@/hooks/use-unmount-animation";
 import useKeyPress from "@/hooks/use-key-press";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { useTMDBGenres } from "@/components/tmdb-genres-provider";
-import { TMDBMediaItemMap, TMDBMediaListResult } from "@/lib/tmdb-types";
+import PlayButton from "@/components/play-button";
+import { MediaListItem } from "@/lib/types";
+import MediaBackdrop from "@/components/media-backdrop";
+import AddToWatchlistButton from "@/components/add-to-watchlist-button";
+import MediaDetailsButton from "@/components/media-details-button";
 
 const ANIMATION_DURATION = 200;
 const OPEN_TIMEOUT = 500;
 const CLOSE_TIMEOUT = 200;
 
-type HoverCardContextProps<T extends keyof TMDBMediaItemMap> = {
+type HoverCardContextProps = {
   isOpen: boolean;
   isMounted: boolean;
   isUnmounting: boolean;
   triggerRect: DOMRect | null;
-  mediaData: TMDBMediaListResult<T>;
+  mediaData: MediaListItem;
   setTriggerRect: Dispatch<SetStateAction<DOMRect | null>>;
   handleOpen: () => void;
   handleClose: () => void;
@@ -43,7 +45,7 @@ type HoverCardContextProps<T extends keyof TMDBMediaItemMap> = {
   opacityAnimation: boolean;
 };
 
-const HoverCardContext = createContext<HoverCardContextProps<"tv" | "movie"> | null>(null);
+const HoverCardContext = createContext<HoverCardContextProps | null>(null);
 
 const useHoverCardContext = () => {
   const context = useContext(HoverCardContext);
@@ -53,18 +55,13 @@ const useHoverCardContext = () => {
   return context;
 };
 
-type HoverCardProps<T extends keyof TMDBMediaItemMap> = {
+type HoverCardProps = {
   children: ReactNode;
-  mediaData: TMDBMediaListResult<T>;
+  mediaData: MediaListItem;
   opacityAnimation?: boolean;
 };
 
-const HoverCard = <T extends keyof TMDBMediaItemMap>({
-  children,
-
-  mediaData,
-  opacityAnimation = false,
-}: HoverCardProps<T>) => {
+const HoverCard = ({ children, mediaData, opacityAnimation = false }: HoverCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null);
   const { isMounted, isUnmounting } = useUnmountAnimation(isOpen, ANIMATION_DURATION);
@@ -114,13 +111,13 @@ const HoverCard = <T extends keyof TMDBMediaItemMap>({
         isMounted,
         isUnmounting,
         triggerRect,
+        opacityAnimation,
         mediaData,
         setTriggerRect,
         handleOpen,
         handleClose,
         handleDebouncedOpen,
         handleDebouncedClose,
-        opacityAnimation,
       }}
     >
       {children}
@@ -135,9 +132,9 @@ const HoverCardContent = () => {
     isMounted,
     isUnmounting,
     mediaData,
+    opacityAnimation,
     handleOpen,
     handleClose,
-    opacityAnimation,
   } = useHoverCardContext();
 
   const hoverCardRef = useRef<HTMLDivElement | null>(null);
@@ -248,10 +245,6 @@ const HoverCardContent = () => {
     }
   }, [isMounted, isUnmounting, opacityAnimation]);
 
-  const { genresMap } = useTMDBGenres();
-
-  const displayTitle = "title" in mediaData ? mediaData.title : mediaData.name;
-
   return (
     <HoverCardPortal>
       {isMounted && (
@@ -259,33 +252,23 @@ const HoverCardContent = () => {
           ref={hoverCardRef}
           onMouseEnter={handleOpen}
           onMouseLeave={handleClose}
-          className={cn(
-            `bg-background absolute z-50 w-[23.3vw] min-w-[330px] rounded-md will-change-transform`,
-          )}
+          className={`bg-background absolute z-50 w-[23.3vw] min-w-[330px] rounded-md will-change-transform`}
         >
-          <div className="relative aspect-video">
-            <Image
-              src={`https://image.tmdb.org/t/p/original/${mediaData.backdrop_path}`}
-              alt="movie"
-              className="rounded-t-md object-cover"
-              fill
-            />
-            <div className="absolute bottom-[8%] left-[8%] w-1/3">
-              {mediaData.logo ? (
-                <Image
-                  src={`https://image.tmdb.org/t/p/original/${mediaData.logo.file_path}`}
-                  alt="movie logo"
-                  className="object-contain"
-                  width={0}
-                  height={0}
-                  sizes="100vw"
-                  style={{ width: "100%", height: "auto" }}
-                />
-              ) : (
-                <span className={"font-semibold"}>{displayTitle}</span>
-              )}
+          {mediaData.video_url ? (
+            <div className="relative aspect-video">
+              <video
+                className="h-full w-full rounded-t-md object-cover"
+                autoPlay
+                disablePictureInPicture
+                muted
+                loop
+                poster={mediaData.backdrop_url}
+                src={mediaData.video_url}
+              ></video>
             </div>
-          </div>
+          ) : (
+            <MediaBackdrop mediaData={mediaData} className={"rounded-t-md"} />
+          )}
           <div
             className={cn(
               "flex flex-col p-4",
@@ -298,9 +281,23 @@ const HoverCardContent = () => {
             }}
           >
             <div className={"mb-2 flex gap-3"}>
-              <PlayButton />
-              <AddToWatchButton />
-              <MoreInfoButton />
+              <PlayButton
+                mediaId={mediaData.id}
+                className={buttonVariants({ variant: "fab", size: "fab" })}
+              >
+                <FaPlay />
+              </PlayButton>
+              <AddToWatchlistButton
+                className={buttonVariants({ variant: "fabOutline", size: "fab" })}
+              >
+                <FaPlus />
+              </AddToWatchlistButton>
+              <MediaDetailsButton
+                mediaId={mediaData.id}
+                className={cn(buttonVariants({ variant: "fabOutline", size: "fab" }), "ms-auto")}
+              >
+                <FaChevronDown />
+              </MediaDetailsButton>
             </div>
             <div className={"my-3 flex items-center gap-2"}>
               <div className={"border-border border px-2 overflow-ellipsis"}>16+</div>
@@ -314,8 +311,8 @@ const HoverCardContent = () => {
               </div>
             </div>
             <div className={"mb-2 flex flex-wrap items-center gap-3"}>
-              {mediaData.genre_ids.map((genreId) => (
-                <div key={genreId}>{genresMap.get(genreId)}</div>
+              {mediaData.genres.map((genre) => (
+                <div key={genre.id}>{genre.name}</div>
               ))}
             </div>
           </div>
@@ -365,42 +362,6 @@ const HoverCardTrigger = ({ children, className }: HoverCardTriggerProps) => {
         {children}
       </div>
     </Link>
-  );
-};
-
-const PlayButton = () => {
-  const { mediaData } = useHoverCardContext();
-
-  return (
-    <Link
-      href={`/play/${mediaData.id}`}
-      className={buttonVariants({ variant: "fab", size: "fab" })}
-    >
-      <FaPlay />
-    </Link>
-  );
-};
-
-const MoreInfoButton = () => {
-  const { mediaData } = useHoverCardContext();
-
-  return (
-    <Link
-      href={`/info/${mediaData.id}`}
-      className={cn(buttonVariants({ variant: "fabOutline", size: "fab" }), "ms-auto")}
-    >
-      <FaChevronDown />
-    </Link>
-  );
-};
-
-const AddToWatchButton = () => {
-  const { mediaData } = useHoverCardContext();
-
-  return (
-    <Button variant={"fabOutline"} size={"fab"}>
-      <FaPlus />
-    </Button>
   );
 };
 

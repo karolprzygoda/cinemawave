@@ -11,6 +11,7 @@ type MediaDetailsButtonProps = {
 const MediaDetailsButton = ({ mediaId, children, className }: MediaDetailsButtonProps) => {
   return (
     <Link href={`/info/${mediaId}`} className={className}>
+      <span className={"sr-only"}>More information about media {mediaId}</span>
       {children}
     </Link>
   );

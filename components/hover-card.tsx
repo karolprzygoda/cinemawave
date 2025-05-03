@@ -120,7 +120,7 @@ const HoverCard = ({ children, mediaData, opacityAnimation = false }: HoverCardP
         handleDebouncedClose,
       }}
     >
-      {children}
+      <HoverCardTrigger>{children}</HoverCardTrigger>
       <HoverCardContent />
     </HoverCardContext.Provider>
   );
@@ -145,7 +145,6 @@ const HoverCardContent = () => {
     const hoverCard = hoverCardRef.current;
     const vw = window.innerWidth;
     const edgeOffset = vw * 0.04;
-    const paddingX = vw * 0.002; // 0.2vw trigger padding
 
     const triggerLeft = Math.round(triggerRect.left);
     const triggerTop = Math.round(triggerRect.top + window.scrollY);
@@ -154,13 +153,9 @@ const HoverCardContent = () => {
     const cardW = hoverCard.offsetWidth;
     const cardH = hoverCard.offsetHeight;
 
-    // trigger content width
-    const contentW = triggerRect.width - 2 * paddingX;
+    const scale = triggerRect.width / cardW;
 
-    const scaleX = contentW / cardW;
-    const scaleY = triggerRect.width / cardW;
-
-    const initialLeft = triggerLeft + paddingX;
+    const initialLeft = triggerLeft;
 
     const centerX = triggerRect.left + triggerRect.width / 2;
     const baseDeltaX = Math.round(centerX - cardW / 2 - initialLeft);
@@ -171,8 +166,7 @@ const HoverCardContent = () => {
 
     const finalDeltaX = baseDeltaX + (isLeftEdge ? edgeOffset : isRightEdge ? -edgeOffset : 0);
 
-    hoverCard.style.setProperty("--hover-scale-x", String(scaleX));
-    hoverCard.style.setProperty("--hover-scale-y", String(scaleY));
+    hoverCard.style.setProperty("--hover-scale", String(scale));
     hoverCard.style.setProperty("--hover-translate-x", `${finalDeltaX}px`);
     hoverCard.style.setProperty("--hover-offset", `${offsetY}px`);
 
@@ -189,8 +183,7 @@ const HoverCardContent = () => {
       el.animate(
         [
           {
-            transform:
-              "translateX(0) translateY(0) scale(var(--hover-scale-x), var(--hover-scale-y))",
+            transform: "translateX(0) translateY(0) scale(var(--hover-scale))",
             boxShadow: "none",
             backgroundColor: "transparent",
             opacity: opacityAnimation ? 0 : 1,
@@ -229,8 +222,7 @@ const HoverCardContent = () => {
             offset: 0.5,
           },
           {
-            transform:
-              "translateX(0) translateY(0) scale(var(--hover-scale-x), var(--hover-scale-y))",
+            transform: "translateX(0) translateY(0) scale(var(--hover-scale))",
             boxShadow: "none",
             backgroundColor: "transparent",
             opacity: opacityAnimation ? 0 : 1,
@@ -255,17 +247,15 @@ const HoverCardContent = () => {
           className={`bg-background absolute z-50 w-[23.3vw] min-w-[330px] rounded-md will-change-transform`}
         >
           {mediaData.video_url ? (
-            <div className="relative aspect-video">
-              <video
-                className="h-full w-full rounded-t-md object-cover"
-                autoPlay
-                disablePictureInPicture
-                muted
-                loop
-                poster={mediaData.backdrop_url}
-                src={mediaData.video_url}
-              ></video>
-            </div>
+            <video
+              className="aspect-video h-full w-full rounded-t-md object-cover"
+              autoPlay
+              disablePictureInPicture
+              muted
+              loop
+              poster={mediaData.backdrop_url}
+              src={mediaData.video_url}
+            ></video>
           ) : (
             <MediaBackdrop mediaData={mediaData} className={"rounded-t-md"} />
           )}
@@ -324,10 +314,9 @@ const HoverCardContent = () => {
 
 type HoverCardTriggerProps = {
   children: ReactNode;
-  className?: string;
 };
 
-const HoverCardTrigger = ({ children, className }: HoverCardTriggerProps) => {
+const HoverCardTrigger = ({ children }: HoverCardTriggerProps) => {
   const { isOpen, mediaData, setTriggerRect, handleDebouncedOpen, handleDebouncedClose } =
     useHoverCardContext();
   const hoverCardTriggerRef = useRef<HTMLAnchorElement | null>(null);
@@ -353,14 +342,8 @@ const HoverCardTrigger = ({ children, className }: HoverCardTriggerProps) => {
       onMouseEnter={handleDebouncedOpen}
       onMouseLeave={handleDebouncedClose}
       ref={hoverCardTriggerRef}
-      className={cn(
-        "group/hover-card-trigger relative flex h-full w-1/2 shrink-0 px-[0.2vw] focus:outline-none sm:w-1/3 md:w-1/4 lg:w-1/5 xl:w-1/6",
-        className,
-      )}
     >
-      <div className="before:rounded-radius relative h-full w-full before:pointer-events-none before:absolute before:inset-0 before:z-20 before:border-[2px] before:border-neutral-300 before:opacity-0 before:content-[''] group-focus/hover-card-trigger:before:opacity-100">
-        {children}
-      </div>
+      {children}
     </Link>
   );
 };
@@ -377,4 +360,4 @@ const HoverCardPortal = ({ children }: HoverCardPortalProps) => {
   return createPortal(children, document.body);
 };
 
-export { HoverCard, HoverCardTrigger };
+export { HoverCard };

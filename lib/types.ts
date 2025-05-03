@@ -1,3 +1,5 @@
+import { TMDBImageType } from "@/lib/tmdb-types";
+
 export type Genre = {
   id: number | string;
   name: string;
@@ -10,7 +12,7 @@ export type MediaListItem = {
   poster_url: string;
   genres: Genre[];
   description: string;
-  logo_url?: string;
+  logo?: TMDBImageType;
   video_url?: string;
 };
 

@@ -26,7 +26,7 @@ const Header = () => {
       )}
     >
       <div className={"flex items-center gap-8"}>
-        <Logo height={14} width={130} />
+        <Logo className={"w-40"} />
         <nav className={"hidden gap-7 text-nowrap xl:flex"}>
           {NAVBAR_LINKS.map((item, index) => (
             <Link

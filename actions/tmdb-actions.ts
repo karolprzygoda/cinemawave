@@ -13,6 +13,7 @@ import { MediaListItem } from "@/lib/types";
 
 const BASE_URL = "https://api.themoviedb.org/3";
 const BASE_IMAGE_URL = "https://image.tmdb.org/t/p/original";
+const BASE_LOGO_URL = "https://image.tmdb.org/t/p/w185";
 
 export async function fetchTMDBGenres(): Promise<TMDBGenre[]> {
   const urls = [
@@ -104,7 +105,10 @@ export async function adaptTMDBMediaListItem<T extends keyof TMDBMediaItemMap>(
       name: genresMap.get(id)!,
     })),
     poster_url: BASE_IMAGE_URL + mediaData.poster_path,
-    logo_url: BASE_IMAGE_URL + logo?.file_path,
+    logo: logo && {
+      ...logo,
+      file_path: BASE_LOGO_URL + logo.file_path,
+    },
   };
 }
 

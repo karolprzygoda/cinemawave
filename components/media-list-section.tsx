@@ -5,14 +5,13 @@ import {
   CarouselNextButton,
   CarouselPrevButton,
 } from "@/components/ui/carousel";
-import { HoverCard, HoverCardTrigger } from "@/components/hover-card";
+import { HoverCard } from "@/components/hover-card";
 import React from "react";
 import { MediaListItem } from "@/lib/types";
 import MediaBackdrop from "@/components/media-backdrop";
 import Image from "next/image";
 import { EmblaOptionsType } from "embla-carousel";
 import NumberSVG from "@/components/number-svg";
-import { cn } from "@/lib/utils";
 
 const CAROUSEL_OPTIONS = {
   slidesToScroll: "auto",
@@ -44,17 +43,20 @@ const MediaListSection = ({ sectionTitle, mediaList, variant = "list" }: TopTenS
 
   return (
     <section className={"my-[3vw] flex flex-col"}>
-      <h3 className={"mx-[4%] mb-3 font-semibold sm:text-xl lg:text-2xl xl:text-3xl"}>
+      <h3 className={"mx-[4%] mb-3 font-semibold sm:text-xl lg:text-2xl xl:text-3xl 2xl:mx-[60px]"}>
         {sectionTitle}
       </h3>
       <Carousel options={CAROUSEL_OPTIONS}>
-        <CarouselContainer className={cn("mx-[4%]", isTopTen && "pb-[10%] md:pb-[5%] lg:pb-0")}>
+        <CarouselContainer className={"mx-[4%] 2xl:mx-[60px]"}>
           {mediaList.slice(0, isTopTen ? 10 : mediaList.length).map((mediaItem, index) => (
-            <HoverCard key={mediaItem.id} opacityAnimation={isTopTen} mediaData={mediaItem}>
-              <HoverCardTrigger className={isTopTen ? "aspect-[10/7]" : "aspect-video"}>
+            <div
+              key={mediaItem.id}
+              className={"w-1/2 px-[0.2vw] sm:w-1/3 md:w-1/4 lg:w-1/5 xl:w-1/6"}
+            >
+              <HoverCard opacityAnimation={isTopTen} mediaData={mediaItem}>
                 <SectionItem mediaData={mediaItem} isTopTen={isTopTen} index={index} />
-              </HoverCardTrigger>
-            </HoverCard>
+              </HoverCard>
+            </div>
           ))}
         </CarouselContainer>
         <CarouselIndex />
@@ -74,19 +76,20 @@ type SectionItemProps = {
 const SectionItem = ({ isTopTen, mediaData, index }: SectionItemProps) => {
   if (isTopTen) {
     return (
-      <>
+      <div className={"relative aspect-[10/9] h-full w-full lg:aspect-[4/3]"}>
         <NumberSVG
           index={index}
-          className="absolute -bottom-5 left-0 z-0 h-2/3 w-1/2 lg:right-auto lg:bottom-0 lg:h-full"
+          className="absolute bottom-2 left-0 h-1/2 w-1/2 lg:bottom-0 lg:h-full"
         />
         <Image
-          width={256}
-          height={384}
-          className="rounded-r-radius absolute right-0 z-0 w-3/5 lg:h-full lg:w-1/2"
+          width={145}
+          height={217}
+          sizes="(min-width: 1280px) 8vw,(min-width: 1024px) 9vw,(min-width: 768px) 14vw, (min-width: 640px) 18vw, 28vw"
+          className="rounded-r-radius absolute right-0 h-full w-3/5 lg:w-1/2"
           src={mediaData.poster_url}
           alt={`${mediaData.title} poster`}
         />
-      </>
+      </div>
     );
   }
 

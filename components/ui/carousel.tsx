@@ -95,7 +95,11 @@ type CarouselContainerProps = {
 };
 
 const CarouselContainer = ({ children, className }: CarouselContainerProps) => {
-  return <div className={cn("flex touch-pan-y touch-pinch-zoom", className)}>{children}</div>;
+  return (
+    <div className={cn("flex touch-pan-y touch-pinch-zoom [&>*]:shrink-0", className)}>
+      {children}
+    </div>
+  );
 };
 
 const CarouselIndex = () => {
@@ -124,8 +128,9 @@ type CarouselButtonProps = {
 const CarouselButton = ({ Icon, className, ...props }: CarouselButtonProps) => {
   return (
     <button
+      type={"button"}
       className={cn(
-        "group/carousel-button absolute top-0 z-20 hidden h-full w-[4%] cursor-pointer items-center justify-center bg-[hsla(0,0%,8%,0.5)] text-[3vw] transition hover:bg-[hsla(0,0%,8%,0.7)] disabled:hidden lg:flex",
+        "group/carousel-button absolute top-0 z-20 hidden h-full w-[4%] cursor-pointer items-center justify-center bg-[hsla(0,0%,8%,0.5)] text-[3vw] transition hover:bg-[hsla(0,0%,8%,0.7)] disabled:hidden lg:flex 2xl:w-[60px] 2xl:text-5xl",
         className,
       )}
       {...props}

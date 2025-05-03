@@ -15,17 +15,16 @@ const MediaBackdrop = ({ mediaData, className }: MediaBackdropProps) => {
         className={className}
         src={`${mediaData.backdrop_url}`}
         alt={`${mediaData.title} poster`}
+        sizes="(min-width: 1280px) calc(16.1vw - 15px), (min-width: 1040px) 18.18vw, (min-width: 780px) 22.92vw, (min-width: 640px) 30vw, 45.63vw"
       />
       <div className="absolute bottom-[8%] left-[8%] w-1/3">
-        {mediaData.logo_url ? (
+        {mediaData.logo ? (
           <Image
-            src={mediaData.logo_url}
+            src={mediaData.logo.file_path}
             alt="movie logo"
-            className="object-contain"
-            width={0}
-            height={0}
-            sizes="100vw"
-            style={{ width: "100%", height: "auto" }}
+            className="h-auto w-full object-contain"
+            width={mediaData.logo.width}
+            height={mediaData.logo.height}
           />
         ) : (
           <span className={"font-semibold"}>{mediaData.title}</span>

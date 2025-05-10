@@ -71,7 +71,7 @@ const AccountMenu = () => {
       <OffcanvasTrigger>
         <AccountMenuTrigger avatarSrc={"/images/default-blue.png"} />
       </OffcanvasTrigger>
-      <OffcanvasContent>
+      <OffcanvasContent side={"right"}>
         <OffcanvasHeader>
           <SwitchProfileButton
             href={"#"}

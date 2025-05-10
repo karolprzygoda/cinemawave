@@ -36,7 +36,11 @@ export async function createSection(
   category?: "popular" | "top_rated",
 ): Promise<MediaSection> {
   if (provider === "prisma") {
-    const media = await prismadb.movie.findMany({ include: { genres: true } });
+    const records = await prismadb.movie.findMany({ include: { genres: true } });
+    const media: MediaListItem[] = records.map((r) => ({
+      ...r,
+      provider: "prisma",
+    }));
     return { provider, title, variant, media };
   }
 

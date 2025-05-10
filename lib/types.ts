@@ -12,6 +12,7 @@ export type MediaListItem = {
   poster_url: string;
   genres: Genre[];
   description: string;
+  provider: "tmdb" | "prisma";
   logo?: TMDBImageType;
   video_url?: string;
 };
@@ -21,4 +22,9 @@ export type MediaSection = {
   title: string;
   variant: "top-ten" | "list";
   media: MediaListItem[];
+};
+
+export type AnimationType = {
+  keyframes: Keyframe[];
+  options: KeyframeAnimationOptions;
 };

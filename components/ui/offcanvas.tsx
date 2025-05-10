@@ -9,17 +9,15 @@ import {
   useState,
 } from "react";
 import { cn } from "@/lib/utils";
-import { createPortal } from "react-dom";
-import { useHydration } from "@/hooks/use-hydration";
 import useKeyPress from "@/hooks/use-key-press";
 import useHideAppOverflow from "@/hooks/use-hide-app-overflow";
-import useUnmountAnimation from "@/hooks/use-unmount-animation";
+import { motion } from "@/components/ui/motion";
+import Portal from "@/components/ui/portal";
 
 const ANIMATION_DURATION = 300;
 
 type OffcanvasContextProps = {
-  isMounted: boolean;
-  isUnmounting: boolean;
+  isOpen: boolean;
   handleOpen: () => void;
   handleClose: () => void;
 };
@@ -40,7 +38,6 @@ type OffcanvasProps = {
 
 const Offcanvas = ({ children }: OffcanvasProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { isMounted, isUnmounting } = useUnmountAnimation(isOpen, ANIMATION_DURATION);
 
   useHideAppOverflow(isOpen);
 
@@ -55,7 +52,7 @@ const Offcanvas = ({ children }: OffcanvasProps) => {
   useKeyPress("Escape", handleClose);
 
   return (
-    <OffcanvasContext.Provider value={{ isMounted, isUnmounting, handleOpen, handleClose }}>
+    <OffcanvasContext.Provider value={{ isOpen, handleOpen, handleClose }}>
       {children}
     </OffcanvasContext.Provider>
   );
@@ -88,7 +85,7 @@ const OffcanvasContent = ({
   children,
   ...props
 }: OffcanvasContentProps) => {
-  const { isMounted, isUnmounting } = useOffcanvasContext();
+  const { isOpen } = useOffcanvasContext();
 
   const baseClasses = "fixed z-[9999] gap-4 bg-background shadow-lg border-border-muted ";
 
@@ -97,22 +94,42 @@ const OffcanvasContent = ({
     right: "inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm",
   };
 
-  const animation = {
-    left: isUnmounting ? "animate-slide-out-ltr" : "animate-slide-in-ltr",
-    right: isUnmounting ? "animate-slide-out-rtl" : "animate-slide-in-rtl",
-  };
-
-  if (!isMounted) return null;
-
   return (
-    <OffcanvasPortal>
+    <Portal>
       <OffcanvasBackDrop />
-      <div
-        className={cn(baseClasses, sideClasses[side], animation[side], className)}
-        style={{
-          animationDuration: `${ANIMATION_DURATION}ms`,
+      <motion.div
+        show={isOpen}
+        initial={{
+          keyframes: [
+            {
+              transform: side === "left" ? "translateX(-100%)" : "translateX(100%)",
+            },
+            {
+              transform: "translateX(0)",
+            },
+          ],
+          options: {
+            duration: ANIMATION_DURATION,
+            easing: "ease-out",
+            fill: "forwards",
+          },
         }}
-        aria-hidden={!isMounted}
+        exit={{
+          keyframes: [
+            {
+              transform: "translateX(0)",
+            },
+            {
+              transform: side === "left" ? "translateX(-100%)" : "translateX(100%)",
+            },
+          ],
+          options: {
+            duration: ANIMATION_DURATION,
+            easing: "ease-out",
+            fill: "forwards",
+          },
+        }}
+        className={cn(baseClasses, sideClasses[side], className)}
         aria-label="Side panel"
         role="dialog"
         aria-modal="true"
@@ -120,27 +137,51 @@ const OffcanvasContent = ({
         {...props}
       >
         {children}
-      </div>
-    </OffcanvasPortal>
+      </motion.div>
+    </Portal>
   );
 };
 
 const OffcanvasBackDrop = () => {
-  const { isMounted, isUnmounting, handleClose } = useOffcanvasContext();
+  const { isOpen, handleClose } = useOffcanvasContext();
 
   return (
-    <div
-      className={cn(
-        "fixed top-0 right-0 z-[9999] h-screen w-screen bg-black/70",
-        isUnmounting ? "animate-fade-out" : "animate-fade-in",
-      )}
-      style={{
-        animationDuration: `${ANIMATION_DURATION}ms`,
+    <motion.div
+      show={isOpen}
+      initial={{
+        keyframes: [
+          {
+            opacity: 0,
+          },
+          {
+            opacity: 1,
+          },
+        ],
+        options: {
+          duration: ANIMATION_DURATION,
+          easing: "ease-out",
+          fill: "forwards",
+        },
       }}
+      exit={{
+        keyframes: [
+          {
+            opacity: 1,
+          },
+          {
+            opacity: 0,
+          },
+        ],
+        options: {
+          duration: ANIMATION_DURATION,
+          easing: "ease-out",
+          fill: "forwards",
+        },
+      }}
+      className={"fixed top-0 right-0 z-[9999] h-screen w-screen bg-black/70"}
       onClick={handleClose}
-      aria-hidden={!isMounted}
       aria-label="Backdrop"
-    ></div>
+    ></motion.div>
   );
 };
 
@@ -173,18 +214,6 @@ const OffcanvasHeader = ({ className, children, ...props }: OffcanvasHeaderProps
       {children}
     </div>
   );
-};
-
-type OffcanvasPortalProps = {
-  children: ReactNode;
-};
-
-const OffcanvasPortal = ({ children }: OffcanvasPortalProps) => {
-  const mounted = useHydration();
-
-  if (!mounted) return null;
-
-  return createPortal(children, document.body);
 };
 
 export { Offcanvas, OffcanvasTrigger, OffcanvasContent, OffcanvasCloseButton, OffcanvasHeader };

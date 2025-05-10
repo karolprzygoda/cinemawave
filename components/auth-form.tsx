@@ -70,14 +70,14 @@ const AuthFormError = ({ children }: AuthFormErrorProps) => {
 };
 
 type AuthFormSubmitButtonProps = {
-  isLoading: boolean;
+  isSubmitting: boolean;
   children: string;
 };
 
-const AuthFormSubmitButton = ({ isLoading, children }: AuthFormSubmitButtonProps) => {
+const AuthFormSubmitButton = ({ isSubmitting, children }: AuthFormSubmitButtonProps) => {
   return (
     <Button type={"submit"}>
-      {isLoading ? <PulseLoader color={"#fff"} size={10} /> : children}
+      {isSubmitting ? <PulseLoader color={"#fff"} size={10} /> : children}
     </Button>
   );
 };

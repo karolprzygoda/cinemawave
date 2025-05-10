@@ -23,7 +23,7 @@ const SignInPage = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isLoading },
+    formState: { errors, isSubmitting },
     setError,
   } = useForm<SignInSchemaType>({
     resolver: zodResolver(signInSchema),
@@ -59,7 +59,7 @@ const SignInPage = () => {
           errorMessage={errors.password?.message}
           {...register("password")}
         />
-        <AuthFormSubmitButton isLoading={isLoading}>Sign in</AuthFormSubmitButton>
+        <AuthFormSubmitButton isSubmitting={isSubmitting}>Sign in</AuthFormSubmitButton>
       </AuthForm>
       <span className={"text-muted-foreground my-3 block w-full text-center"}>OR</span>
       <Button variant={"secondary"}>Sign in as Guest</Button>

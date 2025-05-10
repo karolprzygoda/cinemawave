@@ -1,6 +1,5 @@
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
-import { IconType } from "react-icons";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -57,24 +56,17 @@ const Footer = () => {
             karolprzygodakontakt@gmail.com
           </Link>
         </div>
-        <FooterNavList listItem={FOOTER_NAV_ITEMS} />
-        <PersonalNavList listItem={PERSONAL_NAV_ITEMS} />
+        <FooterNavList />
+        <PersonalNavList />
       </nav>
     </footer>
   );
 };
 
-type FooterNavListProps = {
-  listItem: {
-    href: string;
-    label: string;
-  }[];
-};
-
-const FooterNavList = ({ listItem }: FooterNavListProps) => {
+const FooterNavList = () => {
   return (
     <ul className={"flex flex-wrap justify-between gap-y-5 text-sm lg:justify-start"}>
-      {listItem.map((item, index) => (
+      {FOOTER_NAV_ITEMS.map((item, index) => (
         <li
           className={"basis-[calc(50%-0.75rem)] lg:basis-[calc(25%-0.75rem)]"}
           key={item.label + "-" + index}
@@ -88,19 +80,12 @@ const FooterNavList = ({ listItem }: FooterNavListProps) => {
   );
 };
 
-type PersonalNavListProps = {
-  listItem: {
-    href: string;
-    Icon: IconType;
-  }[];
-};
-
-const PersonalNavList = ({ listItem }: PersonalNavListProps) => {
+const PersonalNavList = () => {
   return (
     <div className={"flex flex-wrap items-center gap-5"}>
       <span>&copy; All rights reserved Karol Przygoda</span>
       <ul className={"flex gap-3"}>
-        {listItem.map((item, index) => (
+        {PERSONAL_NAV_ITEMS.map((item, index) => (
           <li key={item.href + "-" + index}>
             <Link
               href={item.href}

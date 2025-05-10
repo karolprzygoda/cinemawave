@@ -40,7 +40,7 @@ const buttonVariants = cva(
 
 type ButtonProps = {
   className?: string;
-  children: ReactNode;
+  children?: ReactNode;
   type?: "submit" | "reset" | "button";
 } & ButtonHTMLAttributes<HTMLButtonElement> &
   VariantProps<typeof buttonVariants>;

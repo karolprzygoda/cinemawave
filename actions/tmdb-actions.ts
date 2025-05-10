@@ -90,8 +90,7 @@ export async function adaptTMDBMediaListItem<T extends keyof TMDBMediaItemMap>(
     fetchTMDBGenres(),
   ]);
 
-  const logo =
-    mediaImages.logos.find((logo) => logo.iso_639_1 === "en") || mediaImages.logos[0] || null;
+  const logo = mediaImages.logos.find((logo) => logo.iso_639_1 === "en") || mediaImages.logos[0];
 
   const genresMap = new Map(genres.map((genre) => [genre.id, genre.name]));
 
@@ -104,6 +103,7 @@ export async function adaptTMDBMediaListItem<T extends keyof TMDBMediaItemMap>(
       id,
       name: genresMap.get(id)!,
     })),
+    provider: "tmdb",
     poster_url: BASE_IMAGE_URL + mediaData.poster_path,
     logo: logo && {
       ...logo,

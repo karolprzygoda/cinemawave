@@ -11,9 +11,9 @@ import React, {
 } from "react";
 import { cn } from "@/lib/utils";
 import useTimeout from "@/hooks/use-timeout";
-import useUnmountAnimation from "@/hooks/use-unmount-animation";
 import useKeyPress from "@/hooks/use-key-press";
 import useOnClickOutside from "@/hooks/use-onclick-outside";
+import { motion } from "@/components/ui/motion";
 
 const ANIMATION_DURATION = 300;
 
@@ -23,15 +23,14 @@ const DROPDOWN_ALIGNMENT = {
   center: "left-1/2 -translate-x-1/2",
 };
 
-type DropdownMenuContextValues = {
-  isMounted: boolean;
-  isUnmounting: boolean;
+type DropdownMenuContextProps = {
+  isOpen: boolean;
   handleOpen: () => void;
   handleClose: () => void;
   handleOnClickOpen: () => void;
 };
 
-const DropdownMenuContext = createContext<DropdownMenuContextValues | null>(null);
+const DropdownMenuContext = createContext<DropdownMenuContextProps | null>(null);
 
 const useDropdownMenuContext = () => {
   const context = useContext(DropdownMenuContext);
@@ -49,7 +48,6 @@ type DropdownMenuProps = {
 
 const DropdownMenu = ({ children, className, variant = "onClick" }: DropdownMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { isMounted, isUnmounting } = useUnmountAnimation(isOpen, ANIMATION_DURATION);
   const closeTimeout = useTimeout();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -89,8 +87,7 @@ const DropdownMenu = ({ children, className, variant = "onClick" }: DropdownMenu
   return (
     <DropdownMenuContext.Provider
       value={{
-        isMounted,
-        isUnmounting,
+        isOpen,
         handleOpen,
         handleClose,
         handleOnClickOpen,
@@ -114,7 +111,7 @@ type DropdownMenuTriggerProps = {
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
 const DropdownMenuTrigger = ({ children, className, ...props }: DropdownMenuTriggerProps) => {
-  const { isMounted, handleOpen, handleOnClickOpen } = useDropdownMenuContext();
+  const { isOpen, handleOpen, handleOnClickOpen } = useDropdownMenuContext();
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") {
@@ -132,7 +129,7 @@ const DropdownMenuTrigger = ({ children, className, ...props }: DropdownMenuTrig
       onClick={handleOnClickOpen}
       onKeyDown={handleKeyDown}
       aria-haspopup="menu"
-      aria-expanded={isMounted}
+      aria-expanded={isOpen}
       aria-controls={"dropdown-trigger"}
       {...props}
     >
@@ -153,28 +150,53 @@ const DropdownMenuContent = ({
   align = "right",
   ...props
 }: DropdownMenuContentProps) => {
-  const { isMounted, isUnmounting } = useDropdownMenuContext();
-
-  if (!isMounted) return null;
+  const { isOpen } = useDropdownMenuContext();
 
   return (
-    <div
+    <motion.div
+      show={isOpen}
+      initial={{
+        keyframes: [
+          {
+            opacity: 0,
+          },
+          {
+            opacity: 1,
+          },
+        ],
+        options: {
+          duration: ANIMATION_DURATION,
+          easing: "ease-out",
+          fill: "forwards",
+        },
+      }}
+      exit={{
+        keyframes: [
+          {
+            opacity: 1,
+          },
+          {
+            opacity: 0,
+          },
+        ],
+        options: {
+          duration: ANIMATION_DURATION,
+          easing: "ease-out",
+          fill: "forwards",
+        },
+      }}
       className={cn(
         "border-border-muted absolute top-14 flex w-56 flex-col gap-3 border bg-black/90 py-3 shadow",
         DROPDOWN_ALIGNMENT[align],
-        isUnmounting ? "animate-fade-out" : "animate-fade-in",
         className,
       )}
-      style={{
-        animationDuration: `${ANIMATION_DURATION}ms`,
-      }}
       role="menu"
       aria-label={"dropdown-menu"}
       tabIndex={-1}
       {...props}
     >
       {children}
-    </div>
+    </motion.div>
   );
 };
 

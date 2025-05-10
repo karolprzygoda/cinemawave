@@ -1,13 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { ReactNode } from "react";
+import { ComponentProps } from "react";
 
-type AddToWatchlistButtonProps = {
-  children: ReactNode;
-  className?: string;
-}
-
-const AddToWatchlistButton = ({children, className}: AddToWatchlistButtonProps) => {
-  return <Button className={className}>{children}</Button>;
+const AddToWatchlistButton = ({
+  children,
+  className,
+  variant,
+  size,
+}: ComponentProps<typeof Button>) => {
+  return (
+    <Button variant={variant} size={size} className={className}>
+      {children}
+    </Button>
+  );
 };
 
 export default AddToWatchlistButton;

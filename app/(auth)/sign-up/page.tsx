@@ -24,7 +24,7 @@ const SignUpPage = () => {
     register,
     handleSubmit,
     setError,
-    formState: { errors, isLoading },
+    formState: { errors, isSubmitting },
   } = useForm<SignUpSchemaType>({
     resolver: zodResolver(signUpSchema),
     shouldFocusError: false,
@@ -80,7 +80,7 @@ const SignUpPage = () => {
           errorMessage={errors.confirmPassword?.message}
           {...register("confirmPassword")}
         />
-        <AuthFormSubmitButton isLoading={isLoading}>Sign up</AuthFormSubmitButton>
+        <AuthFormSubmitButton isSubmitting={isSubmitting}>Sign up</AuthFormSubmitButton>
       </AuthForm>
       <OAuthButtonsWrapper>
         <OAuthButton Icon={FaGithub} signInWithOAuth={signInWithGithub} setError={setError} />

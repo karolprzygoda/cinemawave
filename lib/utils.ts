@@ -19,3 +19,7 @@ export function getRandomArrayElement<T>(arr: T[]): T {
   const randomIndex = Math.floor(Math.random() * arr.length);
   return arr[randomIndex];
 }
+
+export function getVerticalScrollbarWidth() {
+  return window.innerWidth - document.documentElement.clientWidth;
+}

@@ -1,17 +1,16 @@
 import Link from "next/link";
-import React, { ReactNode } from "react";
+import React, { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { MediaListItem } from "@/lib/types";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 type PlayButtonProps = {
   mediaId: MediaListItem["id"];
-  className?: string;
-  children?: ReactNode;
-};
+} & ComponentProps<typeof Button>;
 
-const PlayButton = ({ mediaId, children, className }: PlayButtonProps) => {
+const PlayButton = ({ mediaId, children, className, variant, size }: PlayButtonProps) => {
   return (
-    <Link href={`/play/${mediaId}`} className={cn(className)}>
+    <Link href={`/play/${mediaId}`} className={cn(buttonVariants({ variant, size }), className)}>
       {children}
     </Link>
   );

@@ -48,6 +48,7 @@ const SignUpPage = () => {
         <Input
           label={"Email"}
           type={"text"}
+          disabled={isSubmitting}
           invalid={!!errors.email}
           errorMessage={errors.email?.message}
           {...register("email")}
@@ -55,6 +56,7 @@ const SignUpPage = () => {
         <Input
           label={"Name"}
           type={"text"}
+          disabled={isSubmitting}
           invalid={!!errors.name}
           errorMessage={errors.name?.message}
           {...register("name")}
@@ -62,6 +64,7 @@ const SignUpPage = () => {
         <Input
           label={"Last Name"}
           type={"text"}
+          disabled={isSubmitting}
           invalid={!!errors.lastName}
           errorMessage={errors.lastName?.message}
           {...register("lastName")}
@@ -69,6 +72,7 @@ const SignUpPage = () => {
         <Input
           label={"Password"}
           type={"password"}
+          disabled={isSubmitting}
           invalid={!!errors.password}
           errorMessage={errors.password?.message}
           {...register("password")}
@@ -76,6 +80,7 @@ const SignUpPage = () => {
         <Input
           label={"Confirm Password"}
           type={"password"}
+          disabled={isSubmitting}
           invalid={!!errors.confirmPassword}
           errorMessage={errors.confirmPassword?.message}
           {...register("confirmPassword")}

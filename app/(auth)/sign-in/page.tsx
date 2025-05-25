@@ -48,6 +48,7 @@ const SignInPage = () => {
         <Input
           label={"Email"}
           type={"text"}
+          disabled={isSubmitting}
           invalid={!!errors.email}
           errorMessage={errors.email?.message}
           {...register("email")}
@@ -55,6 +56,7 @@ const SignInPage = () => {
         <Input
           label={"Password"}
           type={"password"}
+          disabled={isSubmitting}
           invalid={!!errors.password}
           errorMessage={errors.password?.message}
           {...register("password")}

@@ -1,4 +1,6 @@
-import Link from "next/link";
+"use client";
+
+import Link, { LinkProps } from "next/link";
 import React, { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { MediaListItem } from "@/lib/types";
@@ -6,11 +8,18 @@ import { Button, buttonVariants } from "@/components/ui/button";
 
 type PlayButtonProps = {
   mediaId: MediaListItem["id"];
-} & ComponentProps<typeof Button>;
+  children: ReactNode;
+} & Pick<ComponentProps<typeof Button>, "variant" | "size" | "className"> &
+  Omit<LinkProps, "href">;
 
-const PlayButton = ({ mediaId, children, className, variant, size }: PlayButtonProps) => {
+const PlayButton = ({ mediaId, children, className, variant, size, ...props }: PlayButtonProps) => {
   return (
-    <Link href={`/play/${mediaId}`} className={cn(buttonVariants({ variant, size }), className)}>
+    <Link
+      aria-label={"Play media"}
+      href={`/play/${mediaId}`}
+      className={cn(buttonVariants({ variant, size }), className)}
+      {...props}
+    >
       {children}
     </Link>
   );

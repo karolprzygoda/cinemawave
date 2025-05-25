@@ -1,25 +1,19 @@
 "use client";
 
-import React, {
-  createContext,
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useContext,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { createContext, ReactNode, useContext, useLayoutEffect, useState } from "react";
 import useKeyPress from "@/hooks/use-key-press";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn, getVerticalScrollbarWidth } from "@/lib/utils";
-import useDebouncedToggle from "@/hooks/use-debounced-toggle";
 import { motion } from "@/components/ui/motion";
 import Portal from "@/components/ui/portal";
+import useTimeout from "@/hooks/use-timeout";
 
-const ANIMATION_DURATION = 200;
 const OPEN_TIMEOUT = 500;
-const CLOSE_TIMEOUT = 200;
+const ANIMATION_OPTIONS = {
+  duration: 200,
+  easing: "ease-out",
+  fill: "forwards" as const,
+};
 
 type HoverCardProps = {
   children: ReactNode;
@@ -32,11 +26,10 @@ type HoverCardContextProps = {
   triggerRect: DOMRect | null;
   opacityAnimation: boolean;
   edgeOffset: number;
-  setTriggerRect: Dispatch<SetStateAction<DOMRect | null>>;
   handleOpen: () => void;
+  handleDebounceOpen: (e: React.MouseEvent) => void;
   handleClose: () => void;
-  handleDebouncedOpen: (e: React.MouseEvent) => void;
-  handleDebouncedClose: () => void;
+  handleCancelOpen: () => void;
 };
 
 const HoverCardContext = createContext<HoverCardContextProps | null>(null);
@@ -52,33 +45,28 @@ const useHoverCardContext = () => {
 const HoverCard = ({ children, opacityAnimation = false, edgeOffset = 0.05 }: HoverCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null);
-  const { open, close, clear } = useDebouncedToggle(OPEN_TIMEOUT, CLOSE_TIMEOUT);
   const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const { set, clear: handleCancelOpen } = useTimeout();
 
   const handleOpen = () => {
     if (isDesktop) {
-      clear();
       setIsOpen(true);
     }
   };
 
-  const handleClose = () => {
-    clear();
-    setIsOpen(false);
-  };
-
-  const handleDebouncedOpen = (e: React.MouseEvent) => {
+  const handleDebounceOpen = (e: React.MouseEvent) => {
     if (isDesktop) {
       const target = e.currentTarget;
-      open(() => {
-        setIsOpen(true);
+      set(() => {
         setTriggerRect(target.getBoundingClientRect());
-      });
+        setIsOpen(true);
+      }, OPEN_TIMEOUT);
     }
   };
 
-  const handleDebouncedClose = () => {
-    close(() => setIsOpen(false));
+  const handleClose = () => {
+    handleCancelOpen();
+    setIsOpen(false);
   };
 
   useKeyPress("Escape", handleClose);
@@ -90,11 +78,10 @@ const HoverCard = ({ children, opacityAnimation = false, edgeOffset = 0.05 }: Ho
         triggerRect,
         opacityAnimation,
         edgeOffset,
-        setTriggerRect,
         handleOpen,
+        handleDebounceOpen,
         handleClose,
-        handleDebouncedOpen,
-        handleDebouncedClose,
+        handleCancelOpen,
       }}
     >
       {children}
@@ -116,6 +103,7 @@ const HoverCardContent = ({ children, className }: HoverCardContentProps) => {
   const [left, setLeft] = useState(0);
   const [translateX, setTranslateX] = useState(0);
   const [translateY, setTranslateY] = useState(0);
+  const [safeToRender, setSafeToRender] = useState(false);
 
   useLayoutEffect(() => {
     if (!triggerRect) return;
@@ -148,22 +136,26 @@ const HoverCardContent = ({ children, className }: HoverCardContentProps) => {
     setTop(triggerTop);
     setTranslateX(translateX);
     setTranslateY(centerY);
+    setSafeToRender(true);
   }, [triggerRect, edgeOffset]);
+
+  if (!safeToRender) return;
 
   return (
     <Portal>
       <motion.div
         show={isOpen}
         role={"dialog"}
-        style={{ left, top }}
-        initial={{
+        style={{
+          left,
+          top,
+          transform: `scale(${scale}`,
+          boxShadow: "none",
+          backgroundColor: "transparent",
+          opacity: opacityAnimation ? 0 : 1,
+        }}
+        animate={{
           keyframes: [
-            {
-              transform: `translateY(0) translateX(0) translateZ(0) scale(${scale})`,
-              boxShadow: "none",
-              backgroundColor: "transparent",
-              opacity: opacityAnimation ? 0 : 1,
-            },
             {
               backgroundColor: "var(--background)",
               offset: 0.1,
@@ -175,20 +167,10 @@ const HoverCardContent = ({ children, className }: HoverCardContentProps) => {
               opacity: 1,
             },
           ],
-          options: {
-            duration: ANIMATION_DURATION,
-            easing: "ease-out",
-            fill: "forwards",
-          },
+          options: ANIMATION_OPTIONS,
         }}
         exit={{
           keyframes: [
-            {
-              transform: `translateY(calc(-50% + ${translateY}px)) translateX(${translateX}px) translateZ(0) scale(1)`,
-              boxShadow: "0 3px 10px rgba(0, 0, 0, 0.75)",
-              backgroundColor: "var(--background)",
-              opacity: 1,
-            },
             {
               backgroundColor: "var(--background)",
               offset: 0.5,
@@ -200,12 +182,9 @@ const HoverCardContent = ({ children, className }: HoverCardContentProps) => {
               opacity: opacityAnimation ? 0 : 1,
             },
           ],
-          options: {
-            duration: ANIMATION_DURATION,
-            easing: "ease-out",
-            fill: "forwards",
-          },
+          options: ANIMATION_OPTIONS,
         }}
+        onExitFinish={() => setSafeToRender(false)}
         onMouseEnter={handleOpen}
         onMouseLeave={handleClose}
         className={cn(
@@ -225,23 +204,10 @@ type HoverCardTriggerProps = {
 };
 
 const HoverCardTrigger = ({ children, className }: HoverCardTriggerProps) => {
-  const { setTriggerRect, handleDebouncedOpen, handleDebouncedClose } = useHoverCardContext();
-  const hoverCardTriggerRef = useRef<HTMLDivElement | null>(null);
-
-  useLayoutEffect(() => {
-    if (!hoverCardTriggerRef.current) return;
-
-    const rect = hoverCardTriggerRef.current.getBoundingClientRect();
-    setTriggerRect(rect);
-  }, [setTriggerRect]);
+  const { handleDebounceOpen, handleCancelOpen } = useHoverCardContext();
 
   return (
-    <div
-      onMouseEnter={handleDebouncedOpen}
-      onMouseLeave={handleDebouncedClose}
-      ref={hoverCardTriggerRef}
-      className={className}
-    >
+    <div onMouseEnter={handleDebounceOpen} onMouseLeave={handleCancelOpen} className={className}>
       {children}
     </div>
   );

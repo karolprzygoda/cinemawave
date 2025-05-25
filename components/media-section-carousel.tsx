@@ -96,7 +96,7 @@ type CarouselPaginationProps = {
 
 const CarouselPagination = ({ scrollSnaps, current }: CarouselPaginationProps) => {
   return (
-    <ul className={"absolute top-0 right-[4%] -mt-6 mb-3 hidden lg:flex"}>
+    <ul className={"absolute top-0 right-[4%] -mt-4 hidden lg:flex"}>
       {scrollSnaps.map((_, index) => (
         <li
           key={`scroll-snap-${index}`}

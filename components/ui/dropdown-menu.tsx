@@ -155,7 +155,7 @@ const DropdownMenuContent = ({
   return (
     <motion.div
       show={isOpen}
-      initial={{
+      animate={{
         keyframes: [
           {
             opacity: 0,

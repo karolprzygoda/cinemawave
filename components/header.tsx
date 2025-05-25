@@ -20,14 +20,15 @@ const Header = () => {
 
   return (
     <header
+      style={{ backgroundImage: "linear-gradient(180deg, rgba(0, 0, 0, 0.7) 10%, transparent)" }}
       className={cn(
-        "sticky top-0 z-[999] flex h-18 w-full items-center justify-between px-4 py-6 duration-400 before:absolute before:inset-0 before:z-[-1] before:bg-gradient-to-b before:from-[rgba(0,0,0,0.7)] before:from-10% before:to-transparent before:transition-opacity before:duration-400 before:content-[''] md:px-16",
-        scrolled ? "bg-background before:opacity-0" : "before:opacity-100",
+        "sticky top-0 z-[999] flex h-[68px] w-full items-center justify-between px-[4%] duration-400 2xl:px-[60px]",
+        scrolled ? "bg-background" : "bg-transparent",
       )}
     >
       <div className={"flex items-center gap-8"}>
-        <Logo className={"w-40"} />
-        <nav className={"hidden gap-7 text-nowrap xl:flex"}>
+        <Logo className={"w-32"} />
+        <nav className={"hidden gap-7 text-sm text-nowrap xl:flex"}>
           {NAVBAR_LINKS.map((item, index) => (
             <Link
               href={item.href}

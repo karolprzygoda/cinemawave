@@ -30,7 +30,7 @@ const netflix = localFont({
 
 export const metadata: Metadata = {
   title: "cinemawave",
-  description: "Nextflix clone",
+  description: "Netflix clone build in Next.js",
 };
 
 type RootLayoutProps = {
@@ -40,7 +40,9 @@ type RootLayoutProps = {
 const RootLayout = ({ children }: RootLayoutProps) => {
   return (
     <html lang="en">
-      <body className={`${netflix.className} bg-background min-h-screen antialiased`}>
+      <body
+        className={`${netflix.className} bg-background min-h-screen overflow-x-hidden antialiased`}
+      >
         {children}
       </body>
     </html>

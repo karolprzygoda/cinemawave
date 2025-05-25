@@ -99,7 +99,7 @@ const OffcanvasContent = ({
       <OffcanvasBackDrop />
       <motion.div
         show={isOpen}
-        initial={{
+        animate={{
           keyframes: [
             {
               transform: side === "left" ? "translateX(-100%)" : "translateX(100%)",
@@ -148,7 +148,7 @@ const OffcanvasBackDrop = () => {
   return (
     <motion.div
       show={isOpen}
-      initial={{
+      animate={{
         keyframes: [
           {
             opacity: 0,

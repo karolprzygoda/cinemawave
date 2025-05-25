@@ -71,7 +71,7 @@ const AccountMenu = () => {
       <OffcanvasTrigger>
         <AccountMenuTrigger avatarSrc={"/images/default-blue.png"} />
       </OffcanvasTrigger>
-      <OffcanvasContent side={"right"}>
+      <OffcanvasContent>
         <OffcanvasHeader>
           <SwitchProfileButton
             href={"#"}
@@ -100,7 +100,7 @@ type AccountMenuTriggerProps = {
 const AccountMenuTrigger = ({ avatarSrc }: AccountMenuTriggerProps) => {
   return (
     <div className={"flex items-center gap-2"}>
-      <Avatar src={avatarSrc} />
+      <Avatar className={"h-8 w-8"} src={avatarSrc} />
       <FaCaretDown
         className={`hidden rotate-0 transition duration-300 group-aria-expanded/dropdown-trigger:rotate-180 xl:block`}
       />

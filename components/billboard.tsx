@@ -11,10 +11,10 @@ import MediaDetailsButton from "@/components/media-details-button";
 import { MediaListItem } from "@/lib/types";
 
 type BillboardProps = {
-  movie: MediaListItem;
+  media: MediaListItem;
 };
 
-const Billboard = ({ movie }: BillboardProps) => {
+const Billboard = ({ media }: BillboardProps) => {
   const [muted, setMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -51,24 +51,25 @@ const Billboard = ({ movie }: BillboardProps) => {
           autoPlay
           muted={muted}
           loop
-          poster={movie.backdrop_url}
-        >
-          <source src={movie.video_url} type="video/mp4" />
-        </video>
+          poster={media.backdrop_url}
+          src={media.video_url}
+        ></video>
         <BillboardMask />
       </div>
       <div
-        className={"absolute bottom-0 left-[4%] z-50 flex max-w-1/2 flex-col gap-6 xl:max-w-2xl"}
+        className={
+          "absolute bottom-[8.59375%] left-[4%] z-50 flex max-w-1/2 flex-col gap-6 xl:max-w-2xl 2xl:left-[60px]"
+        }
       >
         <h2 className={"text-accent text-3xl font-bold drop-shadow-xl xl:text-6xl"}>
-          {movie.title}
+          {media.title}
         </h2>
         <div className={"text-accent font-semibold drop-shadow-xl xl:text-xl"}>
-          {movie.description}
+          {media.description}
         </div>
         <div className={"flex items-center gap-4"}>
           <PlayButton
-            mediaId={movie.id}
+            mediaId={media.id}
             className={cn(
               buttonVariants({ variant: "accent" }),
               "h-11 px-8 text-xl xl:h-auto xl:py-3 xl:text-2xl xl:font-bold xl:[&_svg]:size-7",
@@ -78,7 +79,7 @@ const Billboard = ({ movie }: BillboardProps) => {
             Play
           </PlayButton>
           <MediaDetailsButton
-            mediaId={movie.id}
+            mediaId={media.id}
             className={cn(
               buttonVariants({ variant: "secondary" }),
               "h-11 px-8 text-xl xl:h-auto xl:py-3 xl:text-2xl xl:font-bold xl:[&_svg]:size-7",
@@ -95,7 +96,7 @@ const Billboard = ({ movie }: BillboardProps) => {
         size={"fab"}
         aria-label={muted ? "Unmute" : "Mute"}
         className={
-          "hover:bg-foreground/20 focus:bg-foreground/60 border-foreground text-foreground absolute right-[4%] bottom-0 h-14 w-14 [&_svg]:size-7"
+          "hover:bg-foreground/20 focus:bg-foreground/60 border-foreground text-foreground absolute right-[4%] bottom-[8.59375%] h-14 w-14 2xl:right-[60px] [&_svg]:size-7"
         }
       >
         {muted ? <GoMute /> : <GoUnmute />}

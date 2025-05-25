@@ -1,8 +1,8 @@
-import Billboard from "@/components/billboard";
 import MediaListSection from "@/components/media-list-section";
-import { getRandomArrayElement } from "@/lib/utils";
 import { notFound } from "next/navigation";
 import { createSection } from "@/actions/media-actions";
+import Billboard from "@/components/billboard";
+import { getRandomArrayElement } from "@/lib/utils";
 
 const Page = async () => {
   const sections = await Promise.all([
@@ -17,9 +17,10 @@ const Page = async () => {
 
   const randomMovie = getRandomArrayElement(prismaSection.media);
 
+  // dodac lazy loading
   return (
     <>
-      <Billboard movie={randomMovie} />
+      <Billboard media={randomMovie} />
       {sections.map((section) => (
         <MediaListSection
           key={section.title}

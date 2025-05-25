@@ -36,10 +36,11 @@ const MediaBackdropLogo = ({ mediaData }: MediaBackdropLogoProps) => {
       {mediaData.logo ? (
         <Image
           src={mediaData.logo.file_path}
-          alt={`${mediaData.title}  logo`}
+          alt={`${mediaData.title} logo`}
           className="h-auto w-full object-contain"
           width={mediaData.logo.width}
           height={mediaData.logo.height}
+          priority
         />
       ) : (
         <span className={"font-semibold"}>{mediaData.title}</span>

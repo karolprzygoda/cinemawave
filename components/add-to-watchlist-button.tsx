@@ -6,9 +6,16 @@ const AddToWatchlistButton = ({
   className,
   variant,
   size,
+  ...props
 }: ComponentProps<typeof Button>) => {
   return (
-    <Button variant={variant} size={size} className={className}>
+    <Button
+      aria-label={"Add to watch list"}
+      variant={variant}
+      size={size}
+      className={className}
+      {...props}
+    >
       {children}
     </Button>
   );

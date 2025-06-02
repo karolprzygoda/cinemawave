@@ -43,7 +43,9 @@ const MediaPreviewContent = ({ mediaItem }: MediaPreviewContentProps) => {
                 <FaPlay />
               </PlayButton>
             </TooltipTrigger>
-            <TooltipContent>Play</TooltipContent>
+            <TooltipContent position={"left"}>
+              AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            </TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
